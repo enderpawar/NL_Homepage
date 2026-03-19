@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+      - master
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -33,6 +35,9 @@ jobs:
         env:
           VITE_BASE_URL: /${{ github.event.repository.name }}/
         run: npm run build
+
+      - name: Sanity check (dist/index.html)
+        run: node -e "const fs=require('fs'); const s=fs.readFileSync('dist/index.html','utf8'); if(s.includes('/src/main.tsx')){ console.error('dist/index.html still references /src/main.tsx'); process.exit(1);} console.log('dist/index.html references built assets');"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
