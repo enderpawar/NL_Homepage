@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { SPLINE_URL } from '../data/config';
 
 // ── 색상 팔레트 ──────────────────────────────────────────────
@@ -158,7 +159,12 @@ export default function Hero() {
 
           {/* CTA */}
           <div className="flex flex-wrap gap-3 pointer-events-auto">
-            <a href="/join" className="bg-[#4F46E5] text-white font-semibold px-5 py-2.5 rounded-lg hover:bg-[#4338CA] transition-colors text-sm shadow-md">지원하기</a>
+            <Link
+              to="/join"
+              className="bg-[#4F46E5] text-white font-semibold px-5 py-2.5 rounded-lg hover:bg-[#4338CA] transition-colors text-sm shadow-md"
+            >
+              지원하기
+            </Link>
             <a href="#about" className="border border-[#D1D5DB] bg-white/70 backdrop-blur-sm text-[#111111] font-semibold px-5 py-2.5 rounded-lg hover:border-[#4F46E5] hover:text-[#4F46E5] transition-colors text-sm">더 알아보기</a>
           </div>
 

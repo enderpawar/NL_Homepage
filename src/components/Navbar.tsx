@@ -54,7 +54,13 @@ export default function Navbar() {
         {/* 좌측 로고 */}
         <div className="flex-1 flex items-center">
           <Link to="/" className="flex items-center gap-2">
-            <img src="/logos/1.png" alt="NL 아이콘" width={36} height={36} className="rounded-lg" />
+            <img
+              src={`${import.meta.env.BASE_URL}logos/1.png`}
+              alt="NL 아이콘"
+              width={36}
+              height={36}
+              className="rounded-lg"
+            />
             <span className="font-bold text-lg text-[#111111] tracking-tight hidden sm:inline">
               Network Leader
             </span>
@@ -82,12 +88,12 @@ export default function Navbar() {
 
         {/* 우측 CTA */}
         <div className="flex-1 flex items-center justify-end">
-          <a
-            href="/join"
+          <Link
+            to="/join"
             className="hidden md:inline-flex bg-[#4F46E5] text-white font-semibold px-4 py-2 rounded-lg hover:bg-[#4338CA] transition-colors"
           >
             지원하기
-          </a>
+          </Link>
           {/* 모바일: 햄버거 버튼 + 드롭다운 */}
           <button
             type="button"

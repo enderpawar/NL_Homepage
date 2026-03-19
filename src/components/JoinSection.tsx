@@ -22,7 +22,7 @@ export default function JoinSection() {
         {/* 좌측 로고 */}
         <div className="flex-1 flex justify-center">
           <img
-            src="/logos/3.png"
+            src={`${import.meta.env.BASE_URL}logos/3.png`}
             alt="NL 로고"
             className="max-w-xs w-full opacity-90"
           />

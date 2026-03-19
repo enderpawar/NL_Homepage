@@ -9,8 +9,13 @@ import BlogPage from './pages/BlogPage';
 import JoinPage from './pages/JoinPage';
 
 export default function App() {
+  const rawBasename = import.meta.env.BASE_URL
+  const basename = rawBasename === '/'
+    ? '/'
+    : rawBasename.replace(/\/$/, '')
+
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <AnnouncementBar />
       <Navbar />
       <main>

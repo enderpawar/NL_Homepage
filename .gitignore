@@ -7,6 +7,7 @@ node_modules/
 .idea/
 *.log
 coverage/
+dist/
 
 # Vite/TS
 *.tsbuildinfo
