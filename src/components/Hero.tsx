@@ -11,7 +11,7 @@ const COLORS: Record<string, string> = {
   op:  '#89DDFF',
   pl:  '#EEFFFF',
 };
-const GHOST = '#3A3A52'; // 아직 타이핑 안 된 가이드 색
+
 
 // ── 코드 토큰 정의 (\n 포함) ─────────────────────────────────
 type Token = { c: string; v: string };
@@ -190,7 +190,8 @@ export default function Hero() {
                           <span
                             key={ci}
                             style={{
-                              color: correct ? cc.color : wrong ? '#FF5555' : GHOST,
+                              color: wrong ? '#FF5555' : cc.color,
+                              opacity: (correct || isCursor) ? 1 : 0.35,
                               backgroundColor:
                                 isCursor && focused ? 'rgba(79,70,229,0.75)' :
                                 wrong               ? 'rgba(255,85,85,0.18)' : 'transparent',

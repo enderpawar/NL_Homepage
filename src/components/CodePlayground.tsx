@@ -113,6 +113,7 @@ export default function CodePlayground() {
 
   return (
     <section
+      id="blog"
       ref={ref}
       className="bg-[#0F0F1B] py-24 px-6 transition-all duration-700"
       style={{ opacity: inView ? 1 : 0 }}
