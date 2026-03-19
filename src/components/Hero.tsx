@@ -219,7 +219,6 @@ export default function Hero() {
                         const fi = line.offset + ci; // CHAR_COLORS 내 절대 인덱스
                         const beforeCursor = fi < typed.length;
                         const isCursor     = fi === typed.length;
-                        const correct      = beforeCursor && typed[fi] === cc.char;
                         const wrong        = beforeCursor && typed[fi] !== cc.char;
 
                         return (
@@ -227,7 +226,9 @@ export default function Hero() {
                             key={ci}
                             style={{
                               color: wrong ? '#FF5555' : cc.color,
-                              opacity: (correct || isCursor) ? 1 : 0.35,
+                              // 타이핑 진행 구간에서 글자를 흐리게 처리하지 않고
+                              // 토큰의 원본 컬러(cc.color)를 그대로 유지
+                              opacity: 1,
                               backgroundColor:
                                 isCursor && focused ? 'rgba(79,70,229,0.75)' :
                                 wrong               ? 'rgba(255,85,85,0.18)' : 'transparent',
