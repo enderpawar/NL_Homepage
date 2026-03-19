@@ -1,6 +1,7 @@
 export const SPLINE_URL = 'https://my.spline.design/cutecomputerfollowcursor-kA12qnqOtkDzxaSpjxRxxQe5/';
 
 export const LINKS = {
+  // ✏️ 구글폼 링크 — 매 모집 시즌마다 이 URL만 교체하면 전체 반영됩니다
   apply:     'https://forms.gle/example',
   kakao:     'https://open.kakao.com/example',
   instagram: 'https://instagram.com/nl_club',

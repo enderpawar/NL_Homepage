@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+
 
 const NAV_ITEMS = [
   { label: '활동소개', to: '/activity' },
@@ -10,6 +11,8 @@ const NAV_ITEMS = [
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -18,6 +21,25 @@ export default function Navbar() {
   }, []);
 
   const isHome = location.pathname === '/';
+  useEffect(() => {
+    // 라우트 변경 시 드롭다운 닫기
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    const onPointerDown = (e: PointerEvent) => {
+      const el = dropdownRef.current;
+      if (!el) return;
+      if (e.target instanceof Node && !el.contains(e.target)) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('pointerdown', onPointerDown);
+    return () => window.removeEventListener('pointerdown', onPointerDown);
+  }, [mobileMenuOpen]);
 
   return (
     <nav
@@ -28,17 +50,22 @@ export default function Navbar() {
       }`}
       style={{ top: 0 }}
     >
-      <div className="w-full px-6 h-16 flex items-center">
+      <div className="w-full px-6 h-16 flex items-center relative">
         {/* 좌측 로고 */}
         <div className="flex-1 flex items-center">
           <Link to="/" className="flex items-center gap-2">
             <img src="/logos/1.png" alt="NL 아이콘" width={36} height={36} className="rounded-lg" />
-            <span className="font-bold text-lg text-[#111111] tracking-tight">NL</span>
+            <span className="font-bold text-lg text-[#111111] tracking-tight hidden sm:inline">
+              Network Leader
+            </span>
+            <span className="font-black text-lg text-[#111111] tracking-tight inline sm:hidden">
+              NL
+            </span>
           </Link>
         </div>
 
         {/* 데스크톱 메뉴(가운데 정렬) */}
-        <ul className="hidden md:flex flex-none items-center gap-8 text-sm font-medium">
+        <ul className="hidden md:flex flex-none items-center gap-12 text-sm font-medium">
           {NAV_ITEMS.map(item => (
             <li key={item.to}>
               <Link
@@ -56,17 +83,56 @@ export default function Navbar() {
         {/* 우측 CTA */}
         <div className="flex-1 flex items-center justify-end">
           <a
-            href={isHome ? '#join' : '/#join'}
+            href="/join"
             className="hidden md:inline-flex bg-[#4F46E5] text-white font-semibold px-4 py-2 rounded-lg hover:bg-[#4338CA] transition-colors"
           >
             지원하기
           </a>
-          <a
-            href={isHome ? '#join' : '/#join'}
-            className="md:hidden bg-[#4F46E5] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#4338CA] transition-colors"
+          {/* 모바일: 햄버거 버튼 + 드롭다운 */}
+          <button
+            type="button"
+            className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] transition-colors"
+            aria-label="메뉴 열기"
+            aria-expanded={mobileMenuOpen}
+            onClick={() => setMobileMenuOpen(v => !v)}
           >
-            지원하기
-          </a>
+            <span aria-hidden="true" className="w-5 h-5 relative block">
+              <span className={`absolute left-0 right-0 h-[2px] bg-white rounded transition-transform duration-200 ${mobileMenuOpen ? 'top-2.5 rotate-45' : 'top-[4px]'}`} />
+              <span className={`absolute left-0 right-0 h-[2px] bg-white rounded transition-opacity duration-200 ${mobileMenuOpen ? 'opacity-0' : 'opacity-100'} top-[11px]`} />
+              <span className={`absolute left-0 right-0 h-[2px] bg-white rounded transition-transform duration-200 ${mobileMenuOpen ? 'top-2.5 -rotate-45' : 'top-[18px]'}`} />
+            </span>
+          </button>
+
+          {mobileMenuOpen && (
+            <div
+              ref={dropdownRef}
+              className="md:hidden absolute right-6 top-16 mt-2 w-[240px] bg-white border border-[#E5E7EB] rounded-xl shadow-lg overflow-hidden"
+            >
+              <div className="px-3 py-2 border-b border-[#E5E7EB]">
+                <div className="text-sm font-bold text-[#111111]">NL 메뉴</div>
+                <div className="text-xs text-[#555555]">활동/임원/블로그</div>
+              </div>
+              <div className="p-2">
+                {NAV_ITEMS.map(item => {
+                  const active = location.pathname === item.to;
+                  return (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`block rounded-lg px-3 py-2 text-sm transition-colors ${
+                        active
+                          ? 'bg-[#EEF2FF] text-[#4F46E5] font-semibold'
+                          : 'text-[#555555] hover:bg-[#F9FAFB] hover:text-[#4F46E5]'
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </nav>

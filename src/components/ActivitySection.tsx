@@ -1,6 +1,13 @@
 import { useInView } from '../hooks/useInView';
 import { ACTIVITIES } from '../data/activities';
 
+const ICONS: Record<string, string> = {
+  menuBook: 'menu_book',
+  code: 'code',
+  mic: 'mic',
+  rocket: 'rocket_launch',
+};
+
 export default function ActivitySection() {
   const headRef  = useInView(0.1);
   const cardsRef = useInView(0.1);
@@ -13,9 +20,18 @@ export default function ActivitySection() {
           className="text-center mb-16 transition-all duration-700"
           style={{ opacity: headRef.inView ? 1 : 0, transform: headRef.inView ? 'translateY(0)' : 'translateY(20px)' }}
         >
-          <h2 className="font-black text-[#111111] mb-4" style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)' }}>
-            주요 활동
-          </h2>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <span
+              aria-hidden="true"
+              className="material-symbols-outlined"
+              style={{ color: '#4F46E5', fontSize: '1.9rem' }}
+            >
+              local_activity
+            </span>
+            <h2 className="font-black text-[#111111]" style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)' }}>
+              주요 활동
+            </h2>
+          </div>
           <p className="text-[#555555] text-lg">NL에서 경험할 수 있는 다양한 활동들을 소개합니다.</p>
         </div>
 
@@ -30,11 +46,28 @@ export default function ActivitySection() {
                 transitionDelay: `${i * 100}ms`,
               }}
             >
-              <div className="text-5xl shrink-0">{act.icon}</div>
+              {(() => {
+                const iconName = ICONS[act.icon] ?? 'menu_book';
+                return (
+                  <div className="shrink-0">
+                    <div className="w-14 h-14 rounded-2xl bg-[#EEF2FF] border border-[#E0E7FF] flex items-center justify-center">
+                      <span
+                        aria-hidden="true"
+                        className="material-symbols-outlined"
+                        style={{ fontSize: '1.8rem', color: '#4F46E5' }}
+                      >
+                        {iconName}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })()}
               <div>
                 <div className="flex items-center gap-3 mb-2">
                   <h3 className="font-bold text-[#111111] text-xl">{act.title}</h3>
-                  <span className="text-xs text-[#4F46E5] bg-[#EEF2FF] px-2 py-0.5 rounded-full font-medium">{act.desc}</span>
+                  <span className="text-xs text-[#4F46E5] bg-[#EEF2FF] px-2 py-0.5 rounded-full font-medium">
+                    {act.desc}
+                  </span>
                 </div>
                 <p className="text-[#555555] leading-relaxed">{act.detail}</p>
               </div>

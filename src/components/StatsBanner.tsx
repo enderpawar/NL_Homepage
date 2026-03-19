@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 const STATS = [
   { label: '창설',        value: 6,   suffix: '년', prefix: '',  color: '#82AAFF' },
   { label: '누적 프로젝트', value: 24,  suffix: '+',  prefix: '',  color: '#C3E88D' },
-  { label: '현 부원',      value: 32,  suffix: '명',  prefix: '', color: '#C792EA' },
+  { label: '현 부원',      value: 67,  suffix: '명',  prefix: '', color: '#C792EA' },
   { label: '스터디 세션',  value: 120, suffix: '+',  prefix: '',  color: '#F78C6C' },
 ];
 

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { SPLINE_URL } from '../data/config';
 
 // ── 색상 팔레트 ──────────────────────────────────────────────
@@ -68,6 +68,20 @@ export default function Hero() {
   const [typed, setTyped]     = useState('');
   const [focused, setFocused] = useState(false);
   const termRef               = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const onChange = () => setIsMobile(mq.matches);
+    onChange();
+    // Safari 대응: addListener/removeListener 지원 케이스가 있어 분기 처리
+    if (typeof mq.addEventListener === 'function') {
+      mq.addEventListener('change', onChange);
+      return () => mq.removeEventListener('change', onChange);
+    }
+    mq.addListener(onChange);
+    return () => mq.removeListener(onChange);
+  }, []);
 
   const progress = Math.round((typed.length / CHAR_COLORS.length) * 100);
   const isDone   = typed.length >= CHAR_COLORS.length;
@@ -89,25 +103,47 @@ export default function Hero() {
   }, [isDone]);
 
   return (
-    <section id="top" className="relative h-screen w-full overflow-hidden bg-white">
-      {/* Spline 전체 배경 */}
-      <iframe
-        src={SPLINE_URL}
-        frameBorder={0}
-        title="NL 3D 인터랙티브"
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none', zIndex: 0 }}
-      />
+    <section
+      id="top"
+      className="relative h-screen w-full overflow-y-hidden overflow-x-hidden md:overflow-x-visible bg-white"
+    >
+      {/* 모바일에서는 3D를 숨기고 배경을 간결화(성능/잘림 방지) */}
+      {!isMobile ? (
+        <iframe
+          src={SPLINE_URL}
+          frameBorder={0}
+          title="NL 3D 인터랙티브"
+          style={{
+            position: 'absolute',
+            left: '-12%',
+            top: '-6%',
+            width: '124%',
+            height: '112%',
+            border: 'none',
+            zIndex: 0,
+          }}
+        />
+      ) : (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(circle at 15% 10%, rgba(79,70,229,0.10) 0%, transparent 40%), radial-gradient(circle at 70% 60%, rgba(130,170,255,0.10) 0%, transparent 45%)',
+          }}
+        />
+      )}
 
       {/* 좌측 오버레이 */}
       <div
-        className="absolute inset-y-0 left-0 w-1/2 flex items-center pointer-events-none"
+        className="absolute inset-y-0 left-0 w-full md:w-1/2 flex items-center pointer-events-none"
         style={{ zIndex: 10, paddingTop: '64px' }}
       >
         <div className="w-full px-8 md:px-14 flex flex-col gap-5">
 
           {/* 배지 */}
           <span className="inline-block bg-[#EEF2FF]/90 backdrop-blur-sm text-[#4F46E5] text-xs font-semibold px-3 py-1 rounded-full w-fit tracking-wide uppercase border border-[#4F46E5]/20">
-            컴퓨터공학과 학술동아리
+            NL -NetWork Leader
           </span>
 
           {/* 굵은 헤드라인 */}
@@ -122,7 +158,7 @@ export default function Hero() {
 
           {/* CTA */}
           <div className="flex flex-wrap gap-3 pointer-events-auto">
-            <a href="#join"  className="bg-[#4F46E5] text-white font-semibold px-5 py-2.5 rounded-lg hover:bg-[#4338CA] transition-colors text-sm shadow-md">지원하기</a>
+            <a href="/join" className="bg-[#4F46E5] text-white font-semibold px-5 py-2.5 rounded-lg hover:bg-[#4338CA] transition-colors text-sm shadow-md">지원하기</a>
             <a href="#about" className="border border-[#D1D5DB] bg-white/70 backdrop-blur-sm text-[#111111] font-semibold px-5 py-2.5 rounded-lg hover:border-[#4F46E5] hover:text-[#4F46E5] transition-colors text-sm">더 알아보기</a>
           </div>
 

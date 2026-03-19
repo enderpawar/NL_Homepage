@@ -1,25 +1,29 @@
 import { useInView } from '../hooks/useInView';
+const AVATAR_ICON_NAMES: Record<string, string> = {
+  person: 'person',
+  personOutline: 'person_outline',
+};
 
 const REVIEWS = [
   {
     name: '김○○',
     role: '23학번 · 현 부원',
     quote: '스터디를 통해 혼자서는 절대 못 배웠을 것들을 배웠어요. 선배들이 정말 친절하고, 같이 프로젝트 하면서 실력이 확 늘었습니다.',
-    avatar: '🧑‍💻',
+    avatar: 'person',
     color: '#82AAFF',
   },
   {
     name: '이○○',
     role: '22학번 · 현 부원',
     quote: '입학하자마자 NL에 들어온 게 대학 생활 최고의 선택이었어요. 해커톤에서 팀원들이랑 밤새 코딩한 기억이 아직도 생생합니다.',
-    avatar: '👩‍💻',
+    avatar: 'personOutline',
     color: '#C3E88D',
   },
   {
     name: '박○○',
     role: '24학번 · 신입 부원',
     quote: '처음에는 실력이 부족할까봐 걱정했는데, 기초부터 차근차근 알려줘서 금방 적응했어요. 망설이지 말고 지원하세요!',
-    avatar: '🙋',
+    avatar: 'person',
     color: '#C792EA',
   },
 ];
@@ -66,7 +70,20 @@ export default function Testimonials() {
                 </p>
                 <p className="font-mono text-xs text-[#546E7A]">{'*/'}</p>
                 <div className="flex items-center gap-3 pt-2 mt-auto">
-                  <span className="text-2xl">{r.avatar}</span>
+                  {(() => {
+                    const iconName = AVATAR_ICON_NAMES[r.avatar] ?? 'person';
+                    return (
+                      <span className="inline-flex items-center justify-center" style={{ color: r.color }}>
+                        <span
+                          aria-hidden="true"
+                          className="material-symbols-outlined"
+                          style={{ fontSize: '1.6rem' }}
+                        >
+                          {iconName}
+                        </span>
+                      </span>
+                    );
+                  })()}
                   <div>
                     <p className="font-bold text-white text-sm">{r.name}</p>
                     <p className="font-mono text-xs text-white/30">{r.role}</p>

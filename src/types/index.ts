@@ -2,6 +2,8 @@ export interface Executive {
   name: string;
   role: string;
   img: string;
+  bio?: string;
+  highlights?: string[];
 }
 
 export interface Activity {

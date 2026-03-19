@@ -43,21 +43,14 @@ export default function JoinSection() {
             모집 기간: {RECRUIT.start} ~ {RECRUIT.end}
           </p>
           <div className="flex flex-wrap gap-3">
-            {recruit.status === 'open' ? (
-              <a
-                href={LINKS.apply}
-                className="bg-[#4F46E5] text-white font-semibold px-6 py-3 rounded-lg hover:bg-[#4338CA] transition-colors text-sm"
-              >
-                지원서 작성하기 →
-              </a>
-            ) : (
-              <button
-                disabled
-                className="bg-gray-700 text-gray-500 font-semibold px-6 py-3 rounded-lg text-sm cursor-not-allowed"
-              >
-                {recruit.status === 'upcoming' ? '모집 시작 전' : '모집이 마감되었습니다'}
-              </button>
-            )}
+            <a
+              href={LINKS.apply}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-[#4F46E5] text-white font-semibold px-6 py-3 rounded-lg hover:bg-[#4338CA] transition-colors text-sm"
+            >
+              지원서 작성하기 →
+            </a>
             <a
               href={LINKS.instagram}
               className="border border-gray-600 text-gray-300 font-semibold px-6 py-3 rounded-lg hover:border-white hover:text-white transition-colors text-sm"
