@@ -20,6 +20,18 @@
   z-index: 0;
 }
 
+/* 데스크톱(xl 이상): 히어로 배경 Spline을 화면 전체 폭으로 복원 */
+@media (min-width: 80rem) {
+  .hero-spline-frame {
+    right: auto;
+    left: -12%;
+    top: -6%;
+    width: 124%;
+    height: 112%;
+    min-height: 112%;
+  }
+}
+
 /* 태블릿·iPad Pro 등: 커서 팔로우 불필요 시 인터랙션 끔 (요청 반영) */
 @media (min-width: 48rem) and (max-width: 79.98rem) {
   .hero-spline-frame {
