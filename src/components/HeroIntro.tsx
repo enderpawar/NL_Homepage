@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const PROMPT_USER = 'guest@nl';
 
@@ -99,12 +99,6 @@ export default function HeroIntro({ onDone }: { onDone: () => void }) {
     return () => clearTimeout(t);
   }, []);
 
-  // 클릭 건너뛰기
-  const handleSkip = useCallback(() => {
-    if (phase === 'exiting') return;
-    setPhase('exiting');
-  }, [phase]);
-
   const currentCmd  = COMMANDS[doneCmds];
   const showAscii   = phase === 'ascii' || phase === 'done' || phase === 'exiting';
   const progressPct =
@@ -114,7 +108,6 @@ export default function HeroIntro({ onDone }: { onDone: () => void }) {
 
   return (
     <div
-      onClick={handleSkip}
       style={{
         position: 'fixed',
         inset: 0,
@@ -126,7 +119,6 @@ export default function HeroIntro({ onDone }: { onDone: () => void }) {
         opacity: phase === 'exiting' ? 0 : 1,
         transition: 'opacity 700ms ease',
         pointerEvents: phase === 'exiting' ? 'none' : 'auto',
-        cursor: phase === 'exiting' ? 'default' : 'pointer',
       }}
     >
       <div style={{ width: '96%', maxWidth: '1280px' }}>
@@ -245,15 +237,6 @@ export default function HeroIntro({ onDone }: { onDone: () => void }) {
               </div>
             )}
 
-            {/* 건너뛰기 힌트 */}
-            {phase !== 'exiting' && phase !== 'done' && (
-              <p
-                className="text-center mt-4 text-white/15 select-none"
-                style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.58rem' }}
-              >
-                클릭하여 건너뛰기
-              </p>
-            )}
           </div>
         </div>
       </div>
