@@ -6,34 +6,51 @@ import HeroCodeDisplay from './HeroCodeDisplay';
 const MOBILE_MQ    = '(max-width: 767px)';
 /** 1024×600 등 짧은 화면: Spline을 우측 슬롯에만 배치 */
 const SHORT_WIDE_MQ = '(min-width: 1024px) and (max-height: 600px)';
+const MAX_RETRIES = 3;
 
 // ── Hero 컴포넌트 ─────────────────────────────────────────────
 export default function Hero({ onBoot }: { onBoot?: () => void }) {
   const [isMobile,   setIsMobile]   = useState(false);
   const [isShortWide, setIsShortWide] = useState(false);
   const [splineActive, setSplineActive] = useState(true);
+  const [splineKey,    setSplineKey]    = useState(0);
+  const [splineLoaded, setSplineLoaded] = useState(false);
+  const [splineRetries, setSplineRetries] = useState(0);
   const heroRef = useRef<HTMLElement>(null);
 
-  // 히어로 섹션이 뷰포트 밖으로 나가면 Spline WebGL 렌더링 중지
-  // 800ms 딜레이: 빠른 scroll-back 시 iframe 재로드 비용 방지
+  // 히어로 섹션이 뷰포트 밖으로 나가면 Spline WebGL 렌더링 중지.
+  // 2000ms 후 관찰 시작: 브라우저 scroll restoration 완료 이후에 동작하여
+  // 초기 로드 시 splineActive가 잘못 false로 전환되는 레이스 조건 방지.
   useEffect(() => {
     const el = heroRef.current;
     if (!el) return;
     let timeout = 0;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          clearTimeout(timeout);
-          setSplineActive(true);
-        } else {
-          timeout = window.setTimeout(() => setSplineActive(false), 800);
-        }
-      },
-      { threshold: 0 }
-    );
-    observer.observe(el);
-    return () => { observer.disconnect(); clearTimeout(timeout); };
+    let observer: IntersectionObserver | null = null;
+
+    const setupDelay = window.setTimeout(() => {
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            clearTimeout(timeout);
+            setSplineActive(true);
+          } else {
+            timeout = window.setTimeout(() => setSplineActive(false), 800);
+          }
+        },
+        { threshold: 0 }
+      );
+      observer.observe(el);
+    }, 2000);
+
+    return () => {
+      clearTimeout(setupDelay);
+      clearTimeout(timeout);
+      observer?.disconnect();
+    };
   }, []);
+
+  // splineKey 변경(재시도) 시 로딩 상태 리셋
+  useEffect(() => { setSplineLoaded(false); }, [splineKey]);
 
   // 미디어 쿼리 감지
   useEffect(() => {
@@ -60,7 +77,20 @@ export default function Hero({ onBoot }: { onBoot?: () => void }) {
   const showFullBleedSpline = !isMobile && !isShortWide;
   const showSplineRightSlot = !isMobile && isShortWide;
 
-  // ── 배경 그라디언트 (Spline 없을 때) ─────────────────────────
+  // iframe onLoad: HTML 문서 로드 완료 → fade-in 시작
+  const handleSplineLoad = () => setSplineLoaded(true);
+
+  // iframe onError: HTTP 실패 시 지수 백오프 재시도 (최대 3회: 2s/4s/6s)
+  const handleSplineError = () => {
+    if (splineRetries >= MAX_RETRIES) return;
+    const backoffMs = (splineRetries + 1) * 2000;
+    window.setTimeout(() => {
+      setSplineRetries(r => r + 1);
+      setSplineKey(k => k + 1);
+    }, backoffMs);
+  };
+
+  // ── 배경 그라디언트 — 항상 렌더링: 로딩 중 + WebGL 실패 폴백 ──
   const gradientBg = (
     <div
       aria-hidden="true"
@@ -72,6 +102,11 @@ export default function Hero({ onBoot }: { onBoot?: () => void }) {
           'radial-gradient(ellipse at 50% 100%, rgba(79,70,229,0.06) 0%, transparent 50%)',
       }}
     />
+  );
+
+  // shimmer: 로딩 중에만 표시, 재시도 한도 초과 시 숨김
+  const shimmerPlaceholder = (
+    <div aria-hidden="true" className="absolute inset-0 hero-spline-shimmer" />
   );
 
   // ── 좌측 텍스트 블록 ─────────────────────────────────────────
@@ -116,16 +151,29 @@ export default function Hero({ onBoot }: { onBoot?: () => void }) {
       id="top"
       className="relative h-screen w-full overflow-x-clip overflow-y-clip bg-white"
     >
-      {/* Spline 3D 배경 */}
-      {showFullBleedSpline ? (
+      {/* 배경 그라디언트 — 항상 렌더링 */}
+      {gradientBg}
+
+      {/* Spline 로딩 shimmer (로드 전 + 재시도 한도 미초과 시) */}
+      {showFullBleedSpline && !splineLoaded && splineRetries < MAX_RETRIES && (
+        shimmerPlaceholder
+      )}
+
+      {/* Spline 풀-블리드 iframe — opacity로 fade-in 제어 */}
+      {showFullBleedSpline && (
         <iframe
+          key={splineKey}
           src={splineActive ? SPLINE_URL : ''}
           frameBorder={0}
           title="NL 3D 인터랙티브"
           className="hero-spline-frame"
+          style={{
+            opacity: splineLoaded ? 1 : 0,
+            transition: splineLoaded ? 'opacity 0.8s ease' : 'none',
+          }}
+          onLoad={handleSplineLoad}
+          onError={handleSplineError}
         />
-      ) : (
-        gradientBg
       )}
 
       {/* ── 짧은 화면: 텍스트 좌측 + Spline 우측 슬롯 ─────────── */}
@@ -136,12 +184,33 @@ export default function Hero({ onBoot }: { onBoot?: () => void }) {
           </div>
           <div className="flex min-h-0 min-w-0 flex-1 basis-0 items-center justify-center pointer-events-auto">
             {showSplineRightSlot && (
-              <div className="hero-spline-slot w-full shadow-sm ring-1 ring-[#E5E7EB]/80">
+              <div className="hero-spline-slot w-full shadow-sm ring-1 ring-[#E5E7EB]/80" style={{ position: 'relative' }}>
+                {/* 슬롯 내부 그라디언트 폴백 */}
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-0 rounded-xl"
+                  style={{
+                    background:
+                      'radial-gradient(ellipse at 30% 30%, rgba(79,70,229,0.15) 0%, transparent 60%),' +
+                      'radial-gradient(ellipse at 70% 70%, rgba(6,182,212,0.10) 0%, transparent 60%)',
+                  }}
+                />
+                {/* 슬롯 shimmer */}
+                {!splineLoaded && splineRetries < MAX_RETRIES && (
+                  <div aria-hidden="true" className="absolute inset-0 rounded-xl hero-spline-shimmer" />
+                )}
                 <iframe
+                  key={splineKey}
                   src={splineActive ? SPLINE_URL : ''}
                   frameBorder={0}
                   title="NL 3D 인터랙티브"
                   className="hero-spline-iframe-fit"
+                  style={{
+                    opacity: splineLoaded ? 1 : 0,
+                    transition: splineLoaded ? 'opacity 0.8s ease' : 'none',
+                  }}
+                  onLoad={handleSplineLoad}
+                  onError={handleSplineError}
                 />
               </div>
             )}
