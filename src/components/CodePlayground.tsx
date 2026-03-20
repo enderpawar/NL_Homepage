@@ -115,7 +115,7 @@ export default function CodePlayground() {
     <section
       id="blog"
       ref={ref}
-      className="bg-[#0F0F1B] py-24 px-6 transition-all duration-700"
+      className="bg-[#0F0F1B] py-16 tablet:py-20 lg:py-24 px-4 tablet:px-6 lg:px-6 transition-all duration-700"
       style={{ opacity: inView ? 1 : 0 }}
     >
       <div className="max-w-[1200px] mx-auto">
@@ -136,7 +136,7 @@ export default function CodePlayground() {
           style={{ transform: inView ? 'translateY(0)' : 'translateY(40px)' }}
         >
           {/* IDE 상단 탭 바 */}
-          <div className="flex items-center bg-[#1A1A2E] border-b border-white/10 px-4 pt-3 gap-1">
+          <div className="flex flex-wrap items-center bg-[#1A1A2E] border-b border-white/10 px-3 tablet:px-4 pt-3 gap-1 tablet:gap-1.5">
             {/* 창 컨트롤 dots */}
             <div className="flex gap-1.5 mr-4">
               <span className="w-3 h-3 rounded-full bg-[#FF5F57]" />
@@ -156,7 +156,7 @@ export default function CodePlayground() {
                 {p.tab}
               </button>
             ))}
-            <div className="ml-auto mb-2">
+            <div className="ml-auto mb-2 w-full tablet:w-auto flex justify-end tablet:justify-end mt-2 tablet:mt-0">
               <button
                 onClick={handleRun}
                 disabled={running}
@@ -172,10 +172,12 @@ export default function CodePlayground() {
           </div>
 
           {/* 에디터 + 출력 패널 */}
-          <div className="flex flex-col md:flex-row" style={{ minHeight: '320px' }}>
+          <div
+            className="flex flex-col tablet:flex-col lg:flex-row min-h-[280px] tablet:min-h-[300px] lg:min-h-[320px]"
+          >
             {/* 코드 패널 */}
-            <div className="flex-1 bg-[#0F0F1B] p-6 overflow-auto">
-              <pre className="font-mono text-sm leading-7">
+            <div className="flex-1 bg-[#0F0F1B] p-4 tablet:p-5 lg:p-6 overflow-auto">
+              <pre className="font-mono text-xs tablet:text-[0.8125rem] lg:text-sm leading-6 tablet:leading-7">
                 {program.lines.map((line, li) => (
                   <div key={li} className="flex">
                     <span className="select-none text-white/20 w-8 shrink-0 text-right mr-4">{li + 1}</span>
@@ -190,7 +192,7 @@ export default function CodePlayground() {
             </div>
 
             {/* 출력 패널 */}
-            <div className="md:w-72 bg-[#12121F] border-t md:border-t-0 md:border-l border-white/10 p-6 flex flex-col">
+            <div className="lg:w-72 min-h-[140px] tablet:min-h-[160px] lg:min-h-0 bg-[#12121F] border-t lg:border-t-0 lg:border-l border-white/10 p-4 tablet:p-5 lg:p-6 flex flex-col">
               <div className="flex items-center gap-2 mb-4">
                 <span className="w-2 h-2 rounded-full bg-[#28CA41]" />
                 <span className="text-white/40 font-mono text-xs">OUTPUT</span>

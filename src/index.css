@@ -2,12 +2,66 @@
 
 @import "tailwindcss";
 
+/*
+ * 태블릿 구간: 768px ~ 1023px (Tailwind md 이상, lg 미만)
+ * 컴포넌트에서 `tablet:` 접두사로 이 구간만 타겟팅
+ */
+@custom-variant tablet (@media (min-width: 48rem) and (max-width: 63.98rem));
+
+/* 히어로 Spline: 화면 우측 절반만 사용 (좌측 텍스트·터미널과 50/50) */
+.hero-spline-frame {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  min-height: 100%;
+  border: none;
+  z-index: 0;
+}
+
+/* 태블릿·iPad Pro 등: 커서 팔로우 불필요 시 인터랙션 끔 (요청 반영) */
+@media (min-width: 48rem) and (max-width: 79.98rem) {
+  .hero-spline-frame {
+    pointer-events: none;
+  }
+}
+
+/*
+ * 1024×600 등 짧은 높이: 전역 iframe(124% 폭) 대신 우측 슬롯에만 embed.
+ * Spline 내부 카메라는 건드릴 수 없으므로, 뷰포트 전체를 중앙 기준으로 살짝 축소해 오브젝트가 덜 잘리게 함.
+ */
+.hero-spline-slot {
+  position: relative;
+  width: 100%;
+  height: min(calc(100dvh - 5.5rem), 520px);
+  max-height: calc(100dvh - 5.5rem);
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.hero-spline-iframe-fit {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 130%;
+  height: 130%;
+  border: none;
+  transform: translate(-50%, -50%) scale(0.76);
+  transform-origin: center center;
+}
+
 * { scroll-behavior: smooth; }
+
+html {
+  overflow-x: hidden;
+}
 
 body {
   font-family: 'Inter', 'Pretendard', sans-serif;
   background-color: #ffffff;
   color: #111111;
+  overflow-x: hidden;
 }
 
 .font-mono { font-family: 'JetBrains Mono', monospace; }

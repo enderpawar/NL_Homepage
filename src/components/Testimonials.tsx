@@ -32,7 +32,7 @@ export default function Testimonials() {
   const { ref, inView } = useInView(0.1);
 
   return (
-    <section ref={ref} className="bg-[#0F0F1B] py-24 px-6">
+    <section ref={ref} className="bg-[#0F0F1B] py-16 tablet:py-20 lg:py-24 px-4 tablet:px-6 lg:px-6">
       <div className="max-w-[1200px] mx-auto">
         <div
           className="text-center mb-16 transition-all duration-700"
@@ -45,7 +45,7 @@ export default function Testimonials() {
           <p className="text-white/40 text-base">NL에서 함께한 사람들의 솔직한 후기입니다.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 tablet:grid-cols-2 lg:grid-cols-3 gap-4 tablet:gap-5 lg:gap-6">
           {REVIEWS.map((r, i) => (
             <div
               key={r.name}

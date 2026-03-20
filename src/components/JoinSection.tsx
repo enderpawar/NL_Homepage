@@ -17,19 +17,19 @@ export default function JoinSection() {
   const recruit = getRecruitStatus();
 
   return (
-    <section id="join" className="bg-[#111111] py-24 px-6">
-      <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-center gap-16">
+    <section id="join" className="bg-[#111111] py-16 tablet:py-20 lg:py-24 px-4 tablet:px-6 lg:px-6">
+      <div className="max-w-[1200px] mx-auto flex flex-col lg:flex-row items-center gap-10 tablet:gap-12 lg:gap-16 text-center lg:text-left">
         {/* 좌측 로고 */}
-        <div className="flex-1 flex justify-center">
+        <div className="flex-1 flex justify-center w-full">
           <img
             src={`${import.meta.env.BASE_URL}logos/3.png`}
             alt="NL 로고"
-            className="max-w-xs w-full opacity-90"
+            className="max-w-[220px] tablet:max-w-xs w-full opacity-90"
           />
         </div>
         {/* 우측 텍스트 */}
-        <div className="flex-1 flex flex-col gap-6">
-          <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full w-fit ${recruit.color}`}>
+        <div className="flex-1 flex flex-col gap-5 tablet:gap-6 w-full items-center lg:items-start">
+          <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full w-fit shrink-0 ${recruit.color}`}>
             {recruit.label}
           </span>
           <h2
@@ -42,7 +42,7 @@ export default function JoinSection() {
             컴퓨터공학을 사랑하는 누구든 환영합니다.<br />
             모집 기간: {RECRUIT.start} ~ {RECRUIT.end}
           </p>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 justify-center lg:justify-start">
             <a
               href={LINKS.apply}
               target="_blank"

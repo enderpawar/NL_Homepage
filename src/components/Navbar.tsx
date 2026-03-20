@@ -9,18 +9,10 @@ const NAV_ITEMS = [
 ];
 
 export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  const isHome = location.pathname === '/';
   useEffect(() => {
     // 라우트 변경 시 드롭다운 닫기
     setMobileMenuOpen(false);
@@ -43,14 +35,9 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled || !isHome
-          ? 'bg-white border-b border-[#E5E7EB] shadow-sm'
-          : 'bg-transparent'
-      }`}
-      style={{ top: 0 }}
+      className="fixed left-0 right-0 top-0 z-50 border-b border-[#E5E7EB] bg-white shadow-sm"
     >
-      <div className="w-full px-6 h-16 flex items-center relative">
+      <div className="relative mx-auto flex h-16 w-full max-w-[1200px] items-center px-4 sm:px-6">
         {/* 좌측 로고 */}
         <div className="flex-1 flex items-center">
           <Link to="/" className="flex items-center gap-2">
@@ -71,7 +58,7 @@ export default function Navbar() {
         </div>
 
         {/* 데스크톱 메뉴(가운데 정렬) */}
-        <ul className="hidden md:flex flex-none items-center gap-12 text-sm font-medium">
+        <ul className="hidden md:flex flex-none items-center gap-6 tablet:gap-8 lg:gap-12 text-sm font-medium">
           {NAV_ITEMS.map(item => (
             <li key={item.to}>
               <Link
@@ -90,7 +77,7 @@ export default function Navbar() {
         <div className="flex-1 flex items-center justify-end">
           <Link
             to="/join"
-            className="hidden md:inline-flex bg-[#4F46E5] text-white font-semibold px-4 py-2 rounded-lg hover:bg-[#4338CA] transition-colors"
+            className="hidden md:inline-flex bg-[#4F46E5] text-white font-semibold px-3 py-1.5 tablet:px-4 tablet:py-2 rounded-lg hover:bg-[#4338CA] transition-colors text-xs tablet:text-sm"
           >
             지원하기
           </Link>
@@ -112,7 +99,7 @@ export default function Navbar() {
           {mobileMenuOpen && (
             <div
               ref={dropdownRef}
-              className="md:hidden absolute right-6 top-16 mt-2 w-[240px] bg-white border border-[#E5E7EB] rounded-xl shadow-lg overflow-hidden"
+              className="md:hidden absolute right-4 top-16 mt-2 w-[240px] bg-white border border-[#E5E7EB] rounded-xl shadow-lg overflow-hidden sm:right-6"
             >
               <div className="px-3 py-2 border-b border-[#E5E7EB]">
                 <div className="text-sm font-bold text-[#111111]">NL 메뉴</div>

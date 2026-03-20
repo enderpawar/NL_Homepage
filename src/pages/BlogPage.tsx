@@ -110,8 +110,8 @@ export default function BlogPage() {
 
       {/* ── 히어로 배너 ── */}
       <div
-        className="relative flex items-end pt-36 pb-16 px-6 overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #0F0F1B 0%, #0d1f3c 60%, #0F0F1B 100%)', minHeight: '300px' }}
+        className="relative flex items-end min-h-[260px] tablet:min-h-[280px] lg:min-h-[300px] pt-32 tablet:pt-[8.5rem] lg:pt-36 pb-12 tablet:pb-14 lg:pb-16 px-4 tablet:px-6 lg:px-6 overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #0F0F1B 0%, #0d1f3c 60%, #0F0F1B 100%)' }}
       >
         <div
           className="absolute inset-0 opacity-5"

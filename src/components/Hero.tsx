@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, type RefObject } from 'react';
 import { Link } from 'react-router-dom';
 import { SPLINE_URL } from '../data/config';
 
@@ -64,25 +64,156 @@ function buildLines(): Line[] {
 
 const LINES = buildLines();
 
+const MOBILE_MQ = '(max-width: 767px)';
+/** 1024×600 등: 전체 레이어 Spline 대신 우측 슬롯에만 3D(중앙·축소), 터미널은 생략 */
+const SHORT_WIDE_MQ = '(min-width: 1024px) and (max-height: 600px)';
+
+type HeroCodeTerminalProps = {
+  termRef: RefObject<HTMLDivElement | null>;
+  focused: boolean;
+  setFocused: (v: boolean) => void;
+  handleKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
+  typed: string;
+  progress: number;
+  isDone: boolean;
+  compact?: boolean;
+};
+
+function HeroCodeTerminal({
+  termRef,
+  focused,
+  setFocused,
+  handleKeyDown,
+  typed,
+  progress,
+  isDone,
+  compact,
+}: HeroCodeTerminalProps) {
+  return (
+    <div
+      ref={termRef}
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      onClick={() => termRef.current?.focus()}
+      className={`rounded-xl overflow-hidden shadow-xl outline-none pointer-events-auto cursor-text transition-all duration-200 w-full ${compact ? 'max-h-[min(520px,calc(100dvh-6rem))] flex flex-col' : ''}`}
+      style={{
+        background: 'rgba(15,15,27,0.92)',
+        backdropFilter: 'blur(14px)',
+        border: `1px solid ${focused ? 'rgba(79,70,229,0.6)' : 'rgba(255,255,255,0.1)'}`,
+        boxShadow: focused ? '0 0 0 2px rgba(79,70,229,0.2)' : undefined,
+      }}
+    >
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/10 select-none shrink-0">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#FF5F57] shrink-0" />
+          <span className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E] shrink-0" />
+          <span className="w-2.5 h-2.5 rounded-full bg-[#28CA41] shrink-0" />
+          <span className="ml-3 font-mono text-xs text-white/30 truncate">club.config.ts</span>
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          {isDone ? (
+            <span className="font-mono text-xs text-[#28CA41]">✓ 완료!</span>
+          ) : typed.length > 0 ? (
+            <span className="font-mono text-xs text-white/30">{progress}%</span>
+          ) : (
+            <span className="font-mono text-xs text-white/25 animate-pulse hidden sm:inline">클릭 후 따라치기 →</span>
+          )}
+        </div>
+      </div>
+
+      <div className="h-0.5 bg-white/5 shrink-0">
+        <div
+          className="h-full bg-[#4F46E5] transition-all duration-150"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+
+      <div className={`px-5 py-4 select-none tablet:px-4 tablet:py-3 ${compact ? 'min-h-0 flex-1 overflow-y-auto' : ''}`}>
+        <pre className={`font-mono text-[0.72rem] tablet:text-[0.74rem] lg:text-[0.78rem] leading-6 ${compact ? 'text-[0.68rem] leading-[1.35]' : ''}`}>
+          {LINES.map((line, lineIdx) => (
+            <div key={lineIdx} className="flex">
+              <span className="text-white/20 w-5 shrink-0 text-right mr-4">{lineIdx + 1}</span>
+              <span>
+                {line.chars.map((cc, ci) => {
+                  const fi = line.offset + ci;
+                  const beforeCursor = fi < typed.length;
+                  const isCursor     = fi === typed.length;
+                  const wrong        = beforeCursor && typed[fi] !== cc.char;
+
+                  return (
+                    <span
+                      key={ci}
+                      style={{
+                        color: wrong ? '#FF5555' : cc.color,
+                        opacity: 1,
+                        backgroundColor:
+                          isCursor && focused ? 'rgba(79,70,229,0.75)' :
+                          wrong               ? 'rgba(255,85,85,0.18)' : 'transparent',
+                        outline: isCursor && !focused ? '1px solid #4F46E5' : undefined,
+                      }}
+                    >
+                      {cc.char === ' ' ? '\u00A0' : cc.char}
+                    </span>
+                  );
+                })}
+
+                {line.offset + line.chars.length === typed.length && (
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      width: '2px',
+                      height: '0.9em',
+                      backgroundColor: focused ? '#4F46E5' : 'transparent',
+                      verticalAlign: 'text-bottom',
+                    }}
+                    className={focused ? 'animate-pulse' : ''}
+                  />
+                )}
+              </span>
+            </div>
+          ))}
+        </pre>
+      </div>
+    </div>
+  );
+}
+
 // ── Hero 컴포넌트 ─────────────────────────────────────────────
 export default function Hero() {
   const [typed, setTyped]     = useState('');
   const [focused, setFocused] = useState(false);
   const termRef               = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [isShortWide, setIsShortWide] = useState(false);
 
   useEffect(() => {
-    const mq = window.matchMedia('(max-width: 767px)');
-    const onChange = () => setIsMobile(mq.matches);
-    onChange();
-    // Safari 대응: addListener/removeListener 지원 케이스가 있어 분기 처리
-    if (typeof mq.addEventListener === 'function') {
-      mq.addEventListener('change', onChange);
-      return () => mq.removeEventListener('change', onChange);
-    }
-    mq.addListener(onChange);
-    return () => mq.removeListener(onChange);
+    const mqM = window.matchMedia(MOBILE_MQ);
+    const mqS = window.matchMedia(SHORT_WIDE_MQ);
+    const sync = () => {
+      setIsMobile(mqM.matches);
+      setIsShortWide(mqS.matches);
+    };
+    sync();
+    const add = (mq: MediaQueryList, fn: () => void) => {
+      if (typeof mq.addEventListener === 'function') mq.addEventListener('change', fn);
+      else mq.addListener(fn);
+    };
+    const rem = (mq: MediaQueryList, fn: () => void) => {
+      if (typeof mq.removeEventListener === 'function') mq.removeEventListener('change', fn);
+      else mq.removeListener(fn);
+    };
+    add(mqM, sync);
+    add(mqS, sync);
+    return () => {
+      rem(mqM, sync);
+      rem(mqS, sync);
+    };
   }, []);
+
+  const showFullBleedSpline = !isMobile && !isShortWide;
+  const showSplineRightSlot   = !isMobile && isShortWide;
 
   const progress = Math.round((typed.length / CHAR_COLORS.length) * 100);
   const isDone   = typed.length >= CHAR_COLORS.length;
@@ -96,183 +227,104 @@ export default function Hero() {
     } else if (e.key === 'Enter') {
       setTyped(t => t + '\n');
     } else if (e.key === 'Tab') {
-      // Tab → 2 스페이스
       setTyped(t => t + '  ');
     } else if (e.key.length === 1) {
       setTyped(t => t + e.key);
     }
   }, [isDone]);
 
+  const gradientBg = (
+    <div
+      aria-hidden="true"
+      className="absolute inset-0"
+      style={{
+        background:
+          'radial-gradient(circle at 15% 10%, rgba(79,70,229,0.10) 0%, transparent 40%), radial-gradient(circle at 70% 60%, rgba(130,170,255,0.10) 0%, transparent 45%)',
+      }}
+    />
+  );
+
+  const textBlock = (
+    <>
+      <span className="inline-block bg-[#EEF2FF]/90 backdrop-blur-sm text-[#4F46E5] text-xs font-semibold px-3 py-1 rounded-full w-fit tracking-wide uppercase border border-[#4F46E5]/20">
+        NL -NetWork Leader
+      </span>
+      <h1
+        className="font-black text-[#111111] leading-[1.1] tablet:tracking-tight"
+        style={{ fontSize: 'clamp(2.2rem, 4vw, 3.5rem)' }}
+      >
+        코드로 세상을<br />연결합니다
+      </h1>
+      <p className="text-[#444444] text-[0.95rem] tablet:text-[0.9rem] leading-relaxed">
+        NL(Network Leader)은 컴퓨터공학과 학생들이<br />함께 배우고, 만들고, 성장하는 학술동아리입니다.
+      </p>
+      <div className="flex flex-wrap gap-3 pointer-events-auto">
+        <Link
+          to="/join"
+          className="bg-[#4F46E5] text-white font-semibold px-5 py-2.5 rounded-lg hover:bg-[#4338CA] transition-colors text-sm shadow-md"
+        >
+          지원하기
+        </Link>
+        <a href="#about" className="border border-[#D1D5DB] bg-white/70 backdrop-blur-sm text-[#111111] font-semibold px-5 py-2.5 rounded-lg hover:border-[#4F46E5] hover:text-[#4F46E5] transition-colors text-sm">더 알아보기</a>
+      </div>
+    </>
+  );
+
   return (
     <section
       id="top"
-      className="relative h-screen w-full overflow-y-hidden overflow-x-hidden md:overflow-x-visible bg-white"
+      className="relative h-screen w-full overflow-x-clip overflow-y-clip bg-white"
     >
-      {/* 모바일에서는 3D를 숨기고 배경을 간결화(성능/잘림 방지) */}
-      {!isMobile ? (
+      {showFullBleedSpline ? (
         <iframe
           src={SPLINE_URL}
           frameBorder={0}
           title="NL 3D 인터랙티브"
-          style={{
-            position: 'absolute',
-            left: '-12%',
-            top: '-6%',
-            width: '124%',
-            height: '112%',
-            border: 'none',
-            zIndex: 0,
-          }}
+          className="hero-spline-frame"
         />
       ) : (
-        <div
-          aria-hidden="true"
-          className="absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(circle at 15% 10%, rgba(79,70,229,0.10) 0%, transparent 40%), radial-gradient(circle at 70% 60%, rgba(130,170,255,0.10) 0%, transparent 45%)',
-          }}
-        />
+        gradientBg
       )}
 
-      {/* 좌측 오버레이 */}
-      <div
-        className="absolute inset-y-0 left-0 w-full md:w-1/2 flex items-center pointer-events-none"
-        style={{ zIndex: 10, paddingTop: '64px' }}
-      >
-        <div className="w-full px-8 md:px-14 flex flex-col gap-5">
-
-          {/* 배지 */}
-          <span className="inline-block bg-[#EEF2FF]/90 backdrop-blur-sm text-[#4F46E5] text-xs font-semibold px-3 py-1 rounded-full w-fit tracking-wide uppercase border border-[#4F46E5]/20">
-            NL -NetWork Leader
-          </span>
-
-          {/* 굵은 헤드라인 */}
-          <h1 className="font-black text-[#111111] leading-[1.1]" style={{ fontSize: 'clamp(2.2rem, 4vw, 3.5rem)' }}>
-            코드로 세상을<br />연결합니다
-          </h1>
-
-          {/* 서브텍스트 */}
-          <p className="text-[#444444] text-[0.95rem] leading-relaxed">
-            NL(Network Leader)은 컴퓨터공학과 학생들이<br />함께 배우고, 만들고, 성장하는 학술동아리입니다.
-          </p>
-
-          {/* CTA */}
-          <div className="flex flex-wrap gap-3 pointer-events-auto">
-            <Link
-              to="/join"
-              className="bg-[#4F46E5] text-white font-semibold px-5 py-2.5 rounded-lg hover:bg-[#4338CA] transition-colors text-sm shadow-md"
-            >
-              지원하기
-            </Link>
-            <a href="#about" className="border border-[#D1D5DB] bg-white/70 backdrop-blur-sm text-[#111111] font-semibold px-5 py-2.5 rounded-lg hover:border-[#4F46E5] hover:text-[#4F46E5] transition-colors text-sm">더 알아보기</a>
+      {isShortWide ? (
+        <div
+          className="absolute inset-0 z-10 flex min-h-0 flex-row items-center gap-5 pt-20 pb-5 pl-6 pr-6 lg:gap-8 lg:pl-10 lg:pr-10 pointer-events-none"
+        >
+          <div className="flex min-h-0 min-w-0 flex-1 basis-0 flex-col gap-3 lg:gap-4 pointer-events-none">
+            {textBlock}
           </div>
-
-          {/* ── 인터랙티브 코드 터미널 ─────────────────────── */}
-          <div
-            ref={termRef}
-            tabIndex={0}
-            onKeyDown={handleKeyDown}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
-            onClick={() => termRef.current?.focus()}
-            className="rounded-xl overflow-hidden shadow-xl outline-none pointer-events-auto cursor-text transition-all duration-200"
-            style={{
-              background: 'rgba(15,15,27,0.92)',
-              backdropFilter: 'blur(14px)',
-              border: `1px solid ${focused ? 'rgba(79,70,229,0.6)' : 'rgba(255,255,255,0.1)'}`,
-              boxShadow: focused ? '0 0 0 2px rgba(79,70,229,0.2)' : undefined,
-            }}
-          >
-            {/* 터미널 헤더 */}
-            <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/10 select-none">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#FF5F57]" />
-                <span className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]" />
-                <span className="w-2.5 h-2.5 rounded-full bg-[#28CA41]" />
-                <span className="ml-3 font-mono text-xs text-white/30">club.config.ts</span>
+          <div className="flex min-h-0 min-w-0 flex-1 basis-0 items-center justify-center pointer-events-auto">
+            {showSplineRightSlot ? (
+              <div className="hero-spline-slot w-full shadow-sm ring-1 ring-[#E5E7EB]/80">
+                <iframe
+                  src={SPLINE_URL}
+                  frameBorder={0}
+                  title="NL 3D 인터랙티브"
+                  className="hero-spline-iframe-fit"
+                />
               </div>
-              <div className="flex items-center gap-3">
-                {isDone ? (
-                  <span className="font-mono text-xs text-[#28CA41]">✓ 완료!</span>
-                ) : typed.length > 0 ? (
-                  <span className="font-mono text-xs text-white/30">{progress}%</span>
-                ) : (
-                  <span className="font-mono text-xs text-white/25 animate-pulse">클릭 후 따라치기 →</span>
-                )}
-              </div>
-            </div>
-
-            {/* 진행 바 */}
-            <div className="h-0.5 bg-white/5">
-              <div
-                className="h-full bg-[#4F46E5] transition-all duration-150"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-
-            {/* 코드 영역 */}
-            <div className="px-5 py-4 select-none">
-              <pre className="font-mono text-[0.78rem] leading-6">
-                {LINES.map((line, lineIdx) => (
-                  <div key={lineIdx} className="flex">
-                    {/* 줄 번호 */}
-                    <span className="text-white/20 w-5 shrink-0 text-right mr-4">{lineIdx + 1}</span>
-
-                    {/* 글자들 */}
-                    <span>
-                      {line.chars.map((cc, ci) => {
-                        const fi = line.offset + ci; // CHAR_COLORS 내 절대 인덱스
-                        const beforeCursor = fi < typed.length;
-                        const isCursor     = fi === typed.length;
-                        const wrong        = beforeCursor && typed[fi] !== cc.char;
-
-                        return (
-                          <span
-                            key={ci}
-                            style={{
-                              color: wrong ? '#FF5555' : cc.color,
-                              // 타이핑 진행 구간에서 글자를 흐리게 처리하지 않고
-                              // 토큰의 원본 컬러(cc.color)를 그대로 유지
-                              opacity: 1,
-                              backgroundColor:
-                                isCursor && focused ? 'rgba(79,70,229,0.75)' :
-                                wrong               ? 'rgba(255,85,85,0.18)' : 'transparent',
-                              outline: isCursor && !focused ? '1px solid #4F46E5' : undefined,
-                            }}
-                          >
-                            {/* 공백이 커서 위치면 보이게 */}
-                            {cc.char === ' ' ? '\u00A0' : cc.char}
-                          </span>
-                        );
-                      })}
-
-                      {/* 커서가 줄 끝(\n 위치)에 있을 때 */}
-                      {line.offset + line.chars.length === typed.length && (
-                        <span
-                          style={{
-                            display: 'inline-block',
-                            width: '2px',
-                            height: '0.9em',
-                            backgroundColor: focused ? '#4F46E5' : 'transparent',
-                            verticalAlign: 'text-bottom',
-                          }}
-                          className={focused ? 'animate-pulse' : ''}
-                        />
-                      )}
-                    </span>
-                  </div>
-                ))}
-
-                {/* 커서가 맨 마지막 글자 뒤에 있을 때 */}
-                {typed.length === CHAR_COLORS.length && !isDone && null}
-              </pre>
-            </div>
+            ) : null}
           </div>
-          {/* ────────────────────────────────────────────────── */}
-
         </div>
-      </div>
+      ) : (
+        <div
+          className="absolute inset-y-0 left-0 flex w-full pointer-events-none pt-20 pb-8 md:w-1/2 md:pt-22 md:pb-10 lg:pt-24 lg:pb-12"
+          style={{ zIndex: 10, alignItems: 'safe center' }}
+        >
+          <div className="mx-auto flex w-full max-w-xl flex-col gap-4 px-8 md:max-w-none md:mx-0 md:px-10 lg:px-14 md:gap-4 lg:gap-5">
+            {textBlock}
+            <HeroCodeTerminal
+              termRef={termRef}
+              focused={focused}
+              setFocused={setFocused}
+              handleKeyDown={handleKeyDown}
+              typed={typed}
+              progress={progress}
+              isDone={isDone}
+            />
+          </div>
+        </div>
+      )}
     </section>
   );
 }

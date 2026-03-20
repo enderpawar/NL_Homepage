@@ -37,8 +37,8 @@ export default function ActivityPage() {
 
       {/* ── 히어로 배너 ── */}
       <div
-        className="relative flex items-end pt-36 pb-16 px-6 overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #0F0F1B 0%, #1A1A3E 60%, #0F0F1B 100%)', minHeight: '340px' }}
+        className="relative flex items-end min-h-[280px] tablet:min-h-[300px] lg:min-h-[340px] pt-32 tablet:pt-[8.5rem] lg:pt-36 pb-12 tablet:pb-14 lg:pb-16 px-4 tablet:px-6 lg:px-6 overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #0F0F1B 0%, #1A1A3E 60%, #0F0F1B 100%)' }}
       >
         {/* 배경 그리드 패턴 */}
         <div

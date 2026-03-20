@@ -28,7 +28,7 @@ export default function StatsBanner() {
   const { ref, inView } = useInView(0.3);
 
   return (
-    <section ref={ref} className="bg-[#1A1A2E] py-16 px-6 border-y border-white/10">
+    <section ref={ref} className="bg-[#1A1A2E] py-12 tablet:py-14 lg:py-16 px-4 tablet:px-6 lg:px-6 border-y border-white/10">
       <div className="max-w-[1200px] mx-auto">
         {/* 터미널 명령어 헤더 */}
         <div className="font-mono text-xs text-white/30 mb-8 flex items-center gap-2">
@@ -36,7 +36,7 @@ export default function StatsBanner() {
           <span className="text-[#64B5F6]">nl</span>
           <span className="text-white/50">--stats --verbose</span>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 tablet:grid-cols-2 lg:grid-cols-4 gap-5 tablet:gap-6 lg:gap-8">
           {STATS.map((s, i) => (
             <div
               key={s.label}

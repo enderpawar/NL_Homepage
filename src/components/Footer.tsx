@@ -2,9 +2,9 @@ import { LINKS } from '../data/config';
 
 export default function Footer() {
   return (
-    <footer className="bg-[#F9FAFB] border-t border-[#E5E7EB] py-12 px-6">
-      <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="flex flex-col items-center md:items-start gap-2">
+    <footer className="bg-[#F9FAFB] border-t border-[#E5E7EB] py-10 tablet:py-11 lg:py-12 px-4 tablet:px-6 lg:px-6">
+      <div className="max-w-[1200px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-8 tablet:gap-10 lg:gap-6">
+        <div className="flex flex-col items-center lg:items-start gap-2 text-center lg:text-left">
           <img
             src={`${import.meta.env.BASE_URL}logos/2.png`}
             alt="Network Leader 텍스트 로고"
@@ -13,7 +13,7 @@ export default function Footer() {
           />
           <p className="text-[#555555] text-sm">컴퓨터공학과 학술동아리 NL(Network Leader)</p>
         </div>
-        <div className="flex items-center gap-6 text-sm text-[#555555]">
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-[#555555]">
           <a href={`mailto:${LINKS.email}`} className="hover:text-[#111111] transition-colors">
             {LINKS.email}
           </a>
