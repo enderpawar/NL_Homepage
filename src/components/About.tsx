@@ -1,16 +1,11 @@
 import { useInView } from '../hooks/useInView';
+import { VALUE_ICONS } from '../data/icons';
 
 const VALUES = [
   { icon: 'public', title: '네트워킹', desc: '다양한 사람들과 연결되고, 함께 성장하는 네트워크를 만듭니다.', file: 'networking.ts', color: '#82AAFF' },
   { icon: 'menuBook', title: '학습',     desc: '정기 스터디와 세미나를 통해 CS 지식과 실무 기술을 함께 쌓습니다.', file: 'learning.py',   color: '#C3E88D' },
   { icon: 'rocket', title: '성장',     desc: '프로젝트와 해커톤으로 실전 경험을 쌓고 커리어를 함께 개척합니다.', file: 'growth.cpp',    color: '#C792EA' },
 ];
-
-const ICONS: Record<string, string> = {
-  public: 'public',
-  menuBook: 'menu_book',
-  rocket: 'rocket_launch',
-};
 
 export default function About() {
   const headingRef = useInView(0.1);
@@ -51,7 +46,7 @@ export default function About() {
               </div>
               <div className="p-5 tablet:p-6 lg:p-7 bg-white">
                 {(() => {
-                  const iconName = ICONS[v.icon] ?? 'public';
+                  const iconName = VALUE_ICONS[v.icon] ?? 'public';
                   return (
                     <span
                       aria-hidden="true"

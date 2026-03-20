@@ -12,10 +12,14 @@ export default function Navbar() {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const mobileToggleButtonRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     // 라우트 변경 시 드롭다운 닫기
     setMobileMenuOpen(false);
+
+    // 라우트 변경 시 스크롤 영역을 최상단으로 초기화
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }, [location.pathname]);
 
   useEffect(() => {
@@ -24,9 +28,15 @@ export default function Navbar() {
     const onPointerDown = (e: PointerEvent) => {
       const el = dropdownRef.current;
       if (!el) return;
-      if (e.target instanceof Node && !el.contains(e.target)) {
-        setMobileMenuOpen(false);
-      }
+      const target = e.target instanceof Node ? e.target : null;
+      if (!target) return;
+
+      // 토글 버튼(햄버거/X)은 "드롭다운 밖 클릭"으로 처리하지 않음.
+      // 그렇지 않으면 pointerdown에서 먼저 닫히고, button onClick의 토글이 다시 열어버리는 현상이 생길 수 있음.
+      const btn = mobileToggleButtonRef.current;
+      if (btn && btn.contains(target)) return;
+
+      if (!el.contains(target)) setMobileMenuOpen(false);
     };
 
     window.addEventListener('pointerdown', onPointerDown);
@@ -52,7 +62,7 @@ export default function Navbar() {
               Network Leader
             </span>
             <span className="font-black text-lg text-[#111111] tracking-tight inline sm:hidden">
-              NL
+              Network Leader
             </span>
           </Link>
         </div>
@@ -77,7 +87,7 @@ export default function Navbar() {
         <div className="flex-1 flex items-center justify-end">
           <Link
             to="/join"
-            className="hidden md:inline-flex bg-[#4F46E5] text-white font-semibold px-3 py-1.5 tablet:px-4 tablet:py-2 rounded-lg hover:bg-[#4338CA] transition-colors text-xs tablet:text-sm"
+            className="hidden md:inline-flex bg-[#4F46E5] text-white font-semibold px-4 py-2 rounded-lg hover:bg-[#4338CA] transition-colors text-sm lg:text-base lg:py-2.5"
           >
             지원하기
           </Link>
@@ -85,7 +95,8 @@ export default function Navbar() {
           <button
             type="button"
             className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg bg-[#4F46E5] hover:bg-[#4338CA] transition-colors"
-            aria-label="메뉴 열기"
+            ref={mobileToggleButtonRef}
+            aria-label={mobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
             aria-expanded={mobileMenuOpen}
             onClick={() => setMobileMenuOpen(v => !v)}
           >
@@ -103,7 +114,7 @@ export default function Navbar() {
             >
               <div className="px-3 py-2 border-b border-[#E5E7EB]">
                 <div className="text-sm font-bold text-[#111111]">NL 메뉴</div>
-                <div className="text-xs text-[#555555]">활동/임원/블로그</div>
+                <div className="text-xs text-[#555555]">활동/임원/블로그/지원하기</div>
               </div>
               <div className="p-2">
                 {NAV_ITEMS.map(item => {
@@ -123,6 +134,20 @@ export default function Navbar() {
                     </Link>
                   );
                 })}
+
+                <div className="mt-2 pt-2 border-t border-[#E5E7EB]">
+                  <Link
+                    to="/join"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`block rounded-lg px-3 py-2 text-sm transition-colors ${
+                      location.pathname === '/join'
+                        ? 'bg-[#4F46E5] text-white font-semibold'
+                        : 'bg-[#EEF2FF] text-[#4F46E5] font-semibold hover:bg-[#E0E7FF] hover:text-[#4338CA]'
+                    }`}
+                  >
+                    지원하기
+                  </Link>
+                </div>
               </div>
             </div>
           )}

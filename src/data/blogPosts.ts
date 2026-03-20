@@ -1,13 +1,6 @@
 // 블로그 글 목록 — Velog/Tistory 글 링크를 여기에 추가하세요
-export interface BlogPost {
-  title: string;
-  summary: string;
-  date: string;
-  url: string;
-  tags: string[];
-  source: 'velog' | 'tistory' | 'other';
-  author?: string;
-}
+import type { BlogPost } from '../types';
+export type { BlogPost };
 
 export const BLOG_POSTS: BlogPost[] = [
   {

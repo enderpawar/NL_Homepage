@@ -1,12 +1,6 @@
 import { useInView } from '../hooks/useInView';
 import { ACTIVITIES } from '../data/activities';
-
-const ICONS: Record<string, string> = {
-  menuBook: 'menu_book',
-  code: 'code',
-  mic: 'mic',
-  rocket: 'rocket_launch',
-};
+import { ACTIVITY_ICONS } from '../data/icons';
 
 const NL_BLUE = '#4F46E5';
 
@@ -119,7 +113,7 @@ export default function ActivityPage() {
                 <div className="p-8 flex gap-5">
                       <div className="w-14 h-14 rounded-2xl bg-[#EEF2FF] border border-[#E0E7FF] flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
                         {(() => {
-                          const iconName = ICONS[act.icon] ?? 'menu_book';
+                          const iconName = ACTIVITY_ICONS[act.icon] ?? 'menu_book';
                           return (
                             <span
                               aria-hidden="true"
