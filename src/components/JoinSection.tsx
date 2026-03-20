@@ -1,17 +1,4 @@
-import { RECRUIT, LINKS } from '../data/config';
-
-function getRecruitStatus() {
-  const now = new Date();
-  const start = new Date(RECRUIT.start);
-  const end = new Date(RECRUIT.end);
-  if (now < start) {
-    return { status: 'upcoming' as const, label: '모집 예정', color: 'bg-yellow-400 text-yellow-900' };
-  }
-  if (now <= end) {
-    return { status: 'open' as const, label: '모집 중', color: 'bg-green-400 text-green-900' };
-  }
-  return { status: 'closed' as const, label: '모집 마감', color: 'bg-gray-400 text-gray-900' };
-}
+import { RECRUIT, LINKS, getRecruitStatus } from '../data/config';
 
 export default function JoinSection() {
   const recruit = getRecruitStatus();
@@ -29,7 +16,7 @@ export default function JoinSection() {
         </div>
         {/* 우측 텍스트 */}
         <div className="flex-1 flex flex-col gap-5 tablet:gap-6 w-full items-center lg:items-start">
-          <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full w-fit shrink-0 ${recruit.color}`}>
+          <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full w-fit shrink-0 ${recruit.badge}`}>
             {recruit.label}
           </span>
           <h2

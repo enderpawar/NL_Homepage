@@ -25,7 +25,7 @@ const CODE_TOKENS: Token[] = [
   { c: 'op',  v: ' = {\n' },
   { c: 'pl',  v: '  ' }, { c: 'key', v: 'name'    }, { c: 'op', v: ':    ' }, { c: 'str', v: '"Network Leader"' }, { c: 'op', v: ',\n' },
   { c: 'pl',  v: '  ' }, { c: 'key', v: 'since'   }, { c: 'op', v: ':   ' }, { c: 'num', v: '2019'             }, { c: 'op', v: ',\n' },
-  { c: 'pl',  v: '  ' }, { c: 'key', v: 'members' }, { c: 'op', v: ': '  }, { c: 'num', v: '32'               }, { c: 'op', v: ',\n' },
+  { c: 'pl',  v: '  ' }, { c: 'key', v: 'members' }, { c: 'op', v: ': '  }, { c: 'num', v: '67'               }, { c: 'op', v: ',\n' },
   { c: 'pl',  v: '  ' }, { c: 'key', v: 'mission' }, { c: 'op', v: ': '  }, { c: 'str', v: '"함께 성장하기"'      }, { c: 'op', v: ',\n' },
   { c: 'pl',  v: '  ' }, { c: 'key', v: 'stack'   }, { c: 'op', v: ':   [' },
     { c: 'str', v: '"C++"' }, { c: 'op', v: ', ' },
@@ -68,6 +68,8 @@ const MOBILE_MQ = '(max-width: 767px)';
 /** 1024×600 등: 전체 레이어 Spline 대신 우측 슬롯에만 3D(중앙·축소), 터미널은 생략 */
 const SHORT_WIDE_MQ = '(min-width: 1024px) and (max-height: 600px)';
 
+type TypingEffect = { fi: number; correct: boolean; nonce: number };
+
 type HeroCodeTerminalProps = {
   termRef: RefObject<HTMLDivElement | null>;
   focused: boolean;
@@ -77,6 +79,7 @@ type HeroCodeTerminalProps = {
   progress: number;
   isDone: boolean;
   compact?: boolean;
+  typingEffect?: TypingEffect | null;
 };
 
 function HeroCodeTerminal({
@@ -88,6 +91,7 @@ function HeroCodeTerminal({
   progress,
   isDone,
   compact,
+  typingEffect,
 }: HeroCodeTerminalProps) {
   return (
     <div
@@ -141,6 +145,8 @@ function HeroCodeTerminal({
                   const beforeCursor = fi < typed.length;
                   const isCursor     = fi === typed.length;
                   const wrong        = beforeCursor && typed[fi] !== cc.char;
+                  const isTypingEffect = typingEffect && fi === typingEffect.fi;
+                  const effectMs = typingEffect ? 170 + (typingEffect.nonce % 7) * 6 : 170;
 
                   return (
                     <span
@@ -152,6 +158,10 @@ function HeroCodeTerminal({
                           isCursor && focused ? 'rgba(79,70,229,0.75)' :
                           wrong               ? 'rgba(255,85,85,0.18)' : 'transparent',
                         outline: isCursor && !focused ? '1px solid #4F46E5' : undefined,
+                        display: isTypingEffect ? 'inline-block' : undefined,
+                        animation: isTypingEffect
+                          ? `${typingEffect?.correct ? 'nlTypingPopCorrect' : 'nlTypingFlashWrong'} ${effectMs}ms ease-out`
+                          : undefined,
                       }}
                     >
                       {cc.char === ' ' ? '\u00A0' : cc.char}
@@ -188,6 +198,35 @@ export default function Hero() {
   const [isMobile, setIsMobile] = useState(false);
   const [isShortWide, setIsShortWide] = useState(false);
 
+  const typedRef = useRef(typed);
+  useEffect(() => {
+    typedRef.current = typed;
+  }, [typed]);
+
+  const [typingEffect, setTypingEffect] = useState<TypingEffect | null>(null);
+
+  const HERO_TITLE = '코드로 세상을\n연결합니다';
+  const [titleTyped, setTitleTyped] = useState('');
+  const subtitleVisible = titleTyped.length >= HERO_TITLE.length;
+
+  useEffect(() => {
+    const reduceMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let idx = 0;
+    setTitleTyped('');
+    // iPad 등에서 reduced motion이 켜져 있어도 "타이핑이 완전히 사라지지 않게" 유지합니다.
+    const speedMs = reduceMotion ? 60 : 28;
+    const id = window.setInterval(() => {
+      idx += 1;
+      setTitleTyped(HERO_TITLE.slice(0, idx));
+      if (idx >= HERO_TITLE.length) window.clearInterval(id);
+    }, speedMs);
+
+    return () => window.clearInterval(id);
+  }, []);
+
   useEffect(() => {
     const mqM = window.matchMedia(MOBILE_MQ);
     const mqS = window.matchMedia(SHORT_WIDE_MQ);
@@ -218,20 +257,46 @@ export default function Hero() {
   const progress = Math.round((typed.length / CHAR_COLORS.length) * 100);
   const isDone   = typed.length >= CHAR_COLORS.length;
 
+  const titleLines = titleTyped.split('\n');
+  const titleLine1 = titleLines[0] ?? '';
+  const titleLine2 = titleLines[1] ?? '';
+
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
     e.preventDefault();
-    if (isDone && e.key !== 'Backspace') return;
+
+    const prevTyped = typedRef.current;
+    const isDoneNow = prevTyped.length >= CHAR_COLORS.length;
+    if (isDoneNow && e.key !== 'Backspace') return;
 
     if (e.key === 'Backspace') {
-      setTyped(t => t.slice(0, -1));
-    } else if (e.key === 'Enter') {
-      setTyped(t => t + '\n');
-    } else if (e.key === 'Tab') {
-      setTyped(t => t + '  ');
-    } else if (e.key.length === 1) {
-      setTyped(t => t + e.key);
+      const next = prevTyped.slice(0, -1);
+      typedRef.current = next;
+      setTypingEffect(null);
+      setTyped(next);
+      return;
     }
-  }, [isDone]);
+
+    let insert = '';
+    if (e.key === 'Enter') insert = '\n';
+    else if (e.key === 'Tab') insert = '  ';
+    else if (e.key.length === 1) insert = e.key;
+    else return;
+
+    const remaining = CHAR_COLORS.length - prevTyped.length;
+    if (remaining <= 0) return;
+    if (insert.length > remaining) insert = insert.slice(0, remaining);
+    if (!insert) return;
+
+    const insertStartFi = prevTyped.length;
+    const expectedChar = CHAR_COLORS[insertStartFi]?.char;
+    const actualChar = insert[0] ?? '';
+    const correct = expectedChar === actualChar;
+
+    const next = prevTyped + insert;
+    typedRef.current = next;
+    setTyped(next);
+    setTypingEffect({ fi: insertStartFi, correct, nonce: Date.now() });
+  }, []);
 
   const gradientBg = (
     <div
@@ -253,9 +318,15 @@ export default function Hero() {
         className="font-black text-[#111111] leading-[1.1] tablet:tracking-tight"
         style={{ fontSize: 'clamp(2.2rem, 4vw, 3.5rem)' }}
       >
-        코드로 세상을<br />연결합니다
+        {titleLine1}
+        <br />
+        {titleLine2}
       </h1>
-      <p className="text-[#444444] text-[0.95rem] tablet:text-[0.9rem] leading-relaxed">
+      <p
+        className={`text-[#444444] text-[0.95rem] tablet:text-[0.9rem] leading-relaxed transition-all duration-300 ${
+          subtitleVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+        }`}
+      >
         NL(Network Leader)은 컴퓨터공학과 학생들이<br />함께 배우고, 만들고, 성장하는 학술동아리입니다.
       </p>
       <div className="flex flex-wrap gap-3 pointer-events-auto">
@@ -321,6 +392,7 @@ export default function Hero() {
               typed={typed}
               progress={progress}
               isDone={isDone}
+              typingEffect={typingEffect}
             />
           </div>
         </div>

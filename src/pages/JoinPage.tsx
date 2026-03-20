@@ -1,13 +1,4 @@
-import { LINKS, RECRUIT } from '../data/config';
-
-function getRecruitStatus() {
-  const now   = new Date();
-  const start = new Date(RECRUIT.start);
-  const end   = new Date(RECRUIT.end);
-  if (now < start) return { label: '모집 예정', badge: 'bg-yellow-400 text-yellow-900' };
-  if (now <= end)  return { label: '모집 중',   badge: 'bg-green-400 text-green-900'  };
-  return              { label: '모집 마감', badge: 'bg-gray-400 text-gray-900'    };
-}
+import { LINKS, RECRUIT, getRecruitStatus } from '../data/config';
 
 export default function JoinPage() {
   const recruit = getRecruitStatus();

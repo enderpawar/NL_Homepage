@@ -1,12 +1,6 @@
 import { useInView } from '../hooks/useInView';
 import { ACTIVITIES } from '../data/activities';
-
-const ICONS: Record<string, string> = {
-  menuBook: 'menu_book',
-  code: 'code',
-  mic: 'mic',
-  rocket: 'rocket_launch',
-};
+import { ACTIVITY_ICONS } from '../data/icons';
 
 export default function ActivitySection() {
   const headRef  = useInView(0.1);
@@ -47,7 +41,7 @@ export default function ActivitySection() {
               }}
             >
               {(() => {
-                const iconName = ICONS[act.icon] ?? 'menu_book';
+                const iconName = ACTIVITY_ICONS[act.icon] ?? 'menu_book';
                 return (
                   <div className="shrink-0">
                     <div className="w-14 h-14 rounded-2xl bg-[#EEF2FF] border border-[#E0E7FF] flex items-center justify-center">
