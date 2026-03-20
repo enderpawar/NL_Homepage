@@ -2,9 +2,9 @@ import { useInView } from '../hooks/useInView';
 import { VALUE_ICONS } from '../data/icons';
 
 const VALUES = [
-  { icon: 'public', title: '네트워킹', desc: '다양한 사람들과 연결되고, 함께 성장하는 네트워크를 만듭니다.', file: 'networking.ts', color: '#82AAFF' },
-  { icon: 'menuBook', title: '학습',     desc: '정기 스터디와 세미나를 통해 CS 지식과 실무 기술을 함께 쌓습니다.', file: 'learning.py',   color: '#C3E88D' },
-  { icon: 'rocket', title: '성장',     desc: '프로젝트와 해커톤으로 실전 경험을 쌓고 커리어를 함께 개척합니다.', file: 'growth.cpp',    color: '#C792EA' },
+  { icon: 'public', title: '네트워킹', desc: '다양한 사람들과 연결되고, 함께 성장하는 네트워크를 만듭니다.', file: 'networking.ts', color: '#818CF8' },
+  { icon: 'menuBook', title: '학습',   desc: '정기 스터디와 세미나를 통해 CS 지식과 실무 기술을 함께 쌓습니다.', file: 'learning.py', color: '#06B6D4' },
+  { icon: 'rocket', title: '성장',     desc: '프로젝트와 해커톤으로 실전 경험을 쌓고 커리어를 함께 개척합니다.', file: 'growth.cpp',  color: '#10B981' },
 ];
 
 export default function About() {

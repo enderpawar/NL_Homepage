@@ -5,10 +5,10 @@ import CodePlayground from '../components/CodePlayground';
 import Testimonials from '../components/Testimonials';
 import JoinSection from '../components/JoinSection';
 
-export default function Home() {
+export default function Home({ introActive = false, onBoot }: { introActive?: boolean; onBoot?: () => void }) {
   return (
     <>
-      <Hero />
+      <Hero introActive={introActive} onBoot={onBoot} />
       <StatsBanner />
       <About />
       <CodePlayground />

@@ -16,6 +16,12 @@ export default function JoinSection() {
         </div>
         {/* 우측 텍스트 */}
         <div className="flex-1 flex flex-col gap-5 tablet:gap-6 w-full items-center lg:items-start">
+          <div className="font-mono text-xs text-white/40 flex items-center gap-1.5 flex-wrap">
+            <span className="text-[#10B981]">$</span>
+            <span className="text-[#818CF8]">nl</span>
+            <span>apply --club=NL --year={new Date().getFullYear()}</span>
+            <span className="inline-block w-1.5 h-3.5 bg-white/25 animate-pulse align-middle" />
+          </div>
           <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full w-fit shrink-0 ${recruit.badge}`}>
             {recruit.label}
           </span>
