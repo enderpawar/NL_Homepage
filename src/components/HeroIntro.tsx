@@ -1,0 +1,262 @@
+import { useState, useEffect, useRef, useCallback } from 'react';
+
+const PROMPT_USER = 'guest@nl';
+
+const COMMANDS: { dir: string; cmd: string }[] = [
+  { dir: '~',                     cmd: 'cd NL_NetworkLeader_CLUB' },
+  { dir: 'NL_NetworkLeader_CLUB', cmd: 'node index.js --boot' },
+];
+
+// 아스키 아트 변경 시 https://patorjk.com/software/taag/ 에서 복사 후 백틱 사이에 붙여넣기
+const ASCII_ART: readonly string[] = String.raw`
+ /$$          /$$$$$$$$ /$$   /$$  /$$$$$$  /$$   /$$ /$$$$$$$$ /$$$$$$$$        /$$$$$$   /$$$$$$  /$$$$$$$  /$$$$$$$$  /$$$$$$
+|  $$        | $$_____/| $$  / $$ /$$__  $$| $$  | $$|__  $$__/| $$_____/       /$$__  $$ /$$__  $$| $$__  $$| $$_____/ /$$__  $$
+ \  $$       | $$      |  $$/ $$/| $$  \__/| $$  | $$   | $$   | $$            | $$  \__/| $$  \ $$| $$  \ $$| $$      | $$  \__/
+  \  $$      | $$$$$    \  $$$$/ | $$      | $$  | $$   | $$   | $$$$$         | $$      | $$  | $$| $$  | $$| $$$$$   |  $$$$$$
+   /$$/      | $$__/     >$$  $$ | $$      | $$  | $$   | $$   | $$__/         | $$      | $$  | $$| $$  | $$| $$__/    \____  $$
+  /$$/       | $$       /$$/\  $$| $$    $$| $$  | $$   | $$   | $$            | $$    $$| $$  | $$| $$  | $$| $$       /$$  \ $$
+ /$$/        | $$$$$$$$| $$  \ $$|  $$$$$$/|  $$$$$$/   | $$   | $$$$$$$$      |  $$$$$$/|  $$$$$$/| $$$$$$$/| $$$$$$$$|  $$$$$$//$$
+|__/         |________/|__/  |__/ \______/  \______/    |__/   |________/       \______/  \______/ |_______/ |________/ \______/| $/
+                                                                                                                                |_/
+
+
+ /$$       /$$$$$$$$  /$$$$$$  /$$$$$$$        /$$$$$$$$ /$$   /$$ /$$$$$$$$       /$$   /$$ /$$$$$$$$ /$$$$$$$$ /$$      /$$  /$$$$$$  /$$$$$$$  /$$   /$$
+| $$      | $$_____/ /$$__  $$| $$__  $$      |__  $$__/| $$  | $$| $$_____/      | $$$ | $$| $$_____/|__  $$__/| $$  /$ | $$ /$$__  $$| $$__  $$| $$  /$$/
+| $$      | $$      | $$  \ $$| $$  \ $$         | $$   | $$  | $$| $$            | $$$$| $$| $$         | $$   | $$ /$$$| $$| $$  \ $$| $$  \ $$| $$ /$$/
+| $$      | $$$$$   | $$$$$$$$| $$  | $$         | $$   | $$$$$$$$| $$$$$         | $$ $$ $$| $$$$$      | $$   | $$/$$ $$ $$| $$  | $$| $$$$$$$/| $$$$$/
+| $$      | $$__/   | $$__  $$| $$  | $$         | $$   | $$__  $$| $$__/         | $$  $$$$| $$__/      | $$   | $$$$_  $$$$| $$  | $$| $$__  $$| $$  $$
+| $$      | $$      | $$  | $$| $$  | $$         | $$   | $$  | $$| $$            | $$\  $$$| $$         | $$   | $$$/ \  $$$| $$  | $$| $$  \ $$| $$\  $$
+| $$$$$$$$| $$$$$$$$| $$  | $$| $$$$$$$/         | $$   | $$  | $$| $$$$$$$$      | $$ \  $$| $$$$$$$$   | $$   | $$/   \  $$|  $$$$$$/| $$  | $$| $$ \  $$
+|________/|________/|__/  |__/|_______/          |__/   |__/  |__/|________/      |__/  \__/|________/   |__/   |__/     \__/ \______/ |__/  |__/|__/  \__/
+`.slice(1).split('\n');
+
+export default function HeroIntro({ onDone }: { onDone: () => void }) {
+  const [doneCmds,   setDoneCmds]   = useState(0);
+  const [charIdx,    setCharIdx]    = useState(0);
+  const [asciiCount, setAsciiCount] = useState(0);
+  const [phase, setPhase] = useState<'idle' | 'typing' | 'ascii' | 'done' | 'exiting'>('idle');
+
+  const onDoneRef = useRef(onDone);
+  onDoneRef.current = onDone;
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  // 스크롤 최하단 유지
+  useEffect(() => {
+    if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
+  });
+
+  // ① 시작 딜레이
+  useEffect(() => {
+    const t = setTimeout(() => setPhase('typing'), 200);
+    return () => clearTimeout(t);
+  }, []);
+
+  // ② 글자 단위 타이핑 (빠르게)
+  useEffect(() => {
+    if (phase !== 'typing') return;
+    const cur = COMMANDS[doneCmds];
+    if (!cur) return;
+    if (charIdx >= cur.cmd.length) {
+      const t = setTimeout(() => {
+        const next = doneCmds + 1;
+        setDoneCmds(next);
+        setCharIdx(0);
+        if (next >= COMMANDS.length) setPhase('ascii');
+      }, 300 + Math.random() * 100);
+      return () => clearTimeout(t);
+    }
+    const t = setTimeout(() => setCharIdx(i => i + 1), 40 + Math.random() * 30);
+    return () => clearTimeout(t);
+  }, [phase, doneCmds, charIdx]);
+
+  // ③ ASCII — 전체 라인을 한 번에 마운트, CSS animation-delay로 순차 등장
+  useEffect(() => {
+    if (phase !== 'ascii') return;
+    setAsciiCount(ASCII_ART.length);
+    // 마지막 줄 delay + duration 이후 done으로 전환
+    const totalMs = ASCII_ART.length * 40 + 400;
+    const t = setTimeout(() => setPhase('done'), totalMs);
+    return () => clearTimeout(t);
+  }, [phase]);
+
+  // ④ done → exiting (ASCII 아트 0.3s 더 노출 후 페이드아웃)
+  useEffect(() => {
+    if (phase !== 'done') return;
+    const t = setTimeout(() => setPhase('exiting'), 1000);
+    return () => clearTimeout(t);
+  }, [phase]);
+
+  // ⑤ exiting → 부모에 완료 알림
+  useEffect(() => {
+    if (phase !== 'exiting') return;
+    const t = setTimeout(() => onDoneRef.current(), 700);
+    return () => clearTimeout(t);
+  }, [phase]);
+
+  // ⑥ 5초 강제 종료 (애니메이션이 느릴 때 대비)
+  useEffect(() => {
+    const t = setTimeout(() => setPhase('exiting'), 5000);
+    return () => clearTimeout(t);
+  }, []);
+
+  // 클릭 건너뛰기
+  const handleSkip = useCallback(() => {
+    if (phase === 'exiting') return;
+    setPhase('exiting');
+  }, [phase]);
+
+  const currentCmd  = COMMANDS[doneCmds];
+  const showAscii   = phase === 'ascii' || phase === 'done' || phase === 'exiting';
+  const progressPct =
+    phase === 'done' || phase === 'exiting' ? 100 :
+    phase === 'ascii'  ? 20 + Math.round((asciiCount / ASCII_ART.length) * 80) :
+    phase === 'typing' ? Math.round((doneCmds / COMMANDS.length) * 20) : 0;
+
+  return (
+    <div
+      onClick={handleSkip}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 9999,
+        background: '#0D0D18',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        opacity: phase === 'exiting' ? 0 : 1,
+        transition: 'opacity 700ms ease',
+        pointerEvents: phase === 'exiting' ? 'none' : 'auto',
+        cursor: phase === 'exiting' ? 'default' : 'pointer',
+      }}
+    >
+      <div style={{ width: '96%', maxWidth: '1280px' }}>
+        {/* 터미널 박스 */}
+        <div
+          className="rounded-xl overflow-hidden shadow-2xl w-full"
+          style={{
+            background: 'rgba(13,13,24,0.98)',
+            border: '1px solid rgba(255,255,255,0.10)',
+          }}
+        >
+          {/* 타이틀 바 */}
+          <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/10 select-none">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#FF5F57]" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#28CA41]" />
+              <span className="ml-3 font-mono text-xs text-white/25">bash — 120×40</span>
+            </div>
+            <span className="font-mono text-[0.6rem] text-white/25">
+              {phase === 'ascii' ? '▶ running...' : (phase === 'done' || phase === 'exiting') ? '✓ exit 0' : ''}
+            </span>
+          </div>
+
+          {/* 진행 바 */}
+          <div className="h-px bg-white/5">
+            <div
+              className="h-full bg-[#818CF8] transition-all duration-300"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+
+          {/* 터미널 바디 */}
+          <div
+            ref={bodyRef}
+            className="px-5 py-4 overflow-x-auto overflow-y-auto select-none"
+            style={{ maxHeight: '70vh' }}
+          >
+            <pre
+              style={{
+                fontFamily: "'JetBrains Mono', 'Courier New', Courier, monospace",
+                fontSize: '0.68rem',
+                lineHeight: '1.65',
+                whiteSpace: 'pre',
+                margin: 0,
+                color: 'rgba(255,255,255,0.88)',
+              }}
+            >
+              {/* 완료된 명령어 */}
+              {COMMANDS.slice(0, doneCmds).map((cmd, i) => (
+                <span key={i} style={{ display: 'block' }}>
+                  <span style={{ color: '#10B981' }}>{PROMPT_USER}</span>
+                  <span style={{ color: 'rgba(255,255,255,0.28)' }}>:</span>
+                  <span style={{ color: '#818CF8' }}>
+                    {cmd.dir === '~' ? '~' : `~/${cmd.dir}`}
+                  </span>
+                  <span style={{ color: 'rgba(255,255,255,0.38)' }}>$ </span>
+                  <span>{cmd.cmd}</span>
+                </span>
+              ))}
+
+              {/* 현재 입력 중 */}
+              {phase === 'typing' && currentCmd && (
+                <span style={{ display: 'block' }}>
+                  <span style={{ color: '#10B981' }}>{PROMPT_USER}</span>
+                  <span style={{ color: 'rgba(255,255,255,0.28)' }}>:</span>
+                  <span style={{ color: '#818CF8' }}>
+                    {currentCmd.dir === '~' ? '~' : `~/${currentCmd.dir}`}
+                  </span>
+                  <span style={{ color: 'rgba(255,255,255,0.38)' }}>$ </span>
+                  <span>{currentCmd.cmd.slice(0, charIdx)}</span>
+                  <span
+                    className="animate-pulse"
+                    style={{
+                      display: 'inline-block',
+                      width: '0.52em',
+                      height: '1em',
+                      background: '#818CF8',
+                      verticalAlign: 'text-bottom',
+                      marginLeft: '1px',
+                    }}
+                  />
+                </span>
+              )}
+            </pre>
+
+            {/* ASCII 아트 */}
+            {showAscii && (
+              <div style={{ zoom: 0.70, marginTop: '2px' }}>
+                <pre
+                  style={{
+                    fontFamily: "'JetBrains Mono', 'Courier New', Courier, monospace",
+                    fontSize: '1rem',
+                    lineHeight: '1.3',
+                    whiteSpace: 'pre',
+                    margin: 0,
+                    padding: 0,
+                    color: '#10B981',
+                    fontKerning: 'none',
+                    textRendering: 'optimizeSpeed',
+                  }}
+                >
+                  {ASCII_ART.slice(0, asciiCount).map((line, i) => (
+                    <span
+                      key={i}
+                      style={{
+                        display: 'block',
+                        animation: 'asciiLineReveal 320ms ease-out both',
+                        animationDelay: `${i * 40}ms`,
+                      }}
+                    >
+                      {line === '' ? '\u00A0' : line}
+                    </span>
+                  ))}
+                </pre>
+              </div>
+            )}
+
+            {/* 건너뛰기 힌트 */}
+            {phase !== 'exiting' && phase !== 'done' && (
+              <p
+                className="text-center mt-4 text-white/15 select-none"
+                style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.58rem' }}
+              >
+                클릭하여 건너뛰기
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

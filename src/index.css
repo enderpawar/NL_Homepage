@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 @import "tailwindcss";
 
@@ -8,12 +9,12 @@
  */
 @custom-variant tablet (@media (min-width: 48rem) and (max-width: 63.98rem));
 
-/* 히어로 Spline: 화면 우측 절반만 사용 (좌측 텍스트·터미널과 50/50) */
+/* 히어로 Spline: 화면 우측 55%를 사용 (약간 중앙으로 당겨 오브젝트 클리핑 방지) */
 .hero-spline-frame {
   position: absolute;
-  right: 0;
+  right: -2%;
   top: 0;
-  width: 50%;
+  width: 55%;
   height: 100%;
   min-height: 100%;
   border: none;
@@ -63,6 +64,26 @@
   transform-origin: center center;
 }
 
+/* 인터랙티브 터미널 등장 */
+@keyframes fadeInTerm {
+  0%   { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0);   }
+}
+
+/* ASCII 아트 라인 등장 — CRT 스캔라인 효과
+   ⚠️  letter-spacing 절대 금지: 각 줄의 애니메이션 타이밍이 달라
+       글자 간격이 줄마다 달라지면 열 정렬이 완전히 붕괴됨 */
+@keyframes asciiLineReveal {
+  0%   { opacity: 0; filter: brightness(4) saturate(0.3); }
+  45%  { opacity: 1; filter: brightness(1.9); }
+  100% { opacity: 1; filter: brightness(1);  }
+}
+
+@keyframes codeLineReveal {
+  0%   { opacity: 0; transform: translateY(-6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes nlTypingPopCorrect {
   0% {
     transform: scale(1);
@@ -100,7 +121,7 @@ html {
 }
 
 body {
-  font-family: 'Inter', 'Pretendard', sans-serif;
+  font-family: 'Pretendard Variable', Pretendard, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
   background-color: #ffffff;
   color: #111111;
   overflow-x: hidden;
