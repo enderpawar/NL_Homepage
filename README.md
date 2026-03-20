@@ -38,20 +38,18 @@ npm run preview
 - `src/data/`: 교체 가능한 데이터만 모아둔 폴더
 - `src/types/`: 공통 타입 정의
 
-## 수정 포인트 (데이터만 교체)
+## 유지보수 (데이터만 교체)
 
-대부분의 내용은 `src/data/`에서만 수정하면 됩니다.
+**TypeScript를 몰라도 됩니다.** `src/data/` 폴더 안의 파일만 수정하면 됩니다.
 
-- `src/data/config.ts`
-  - `SPLINE_URL` (Hero에 사용되는 Spline URL)
-  - `LINKS` (지원/소셜/이메일 링크 등)
-  - `RECRUIT` (모집 시작/종료 날짜)
-- `src/data/executives.ts`
-  - 임원 카드(`현 임원진`) 정보
-- `src/data/activities.ts`
-  - 활동 소개 카드 정보
-- `src/data/blogPosts.ts`
-  - 블로그 카드 목록/태그/링크
+| 파일 | 수정 내용 |
+|------|----------|
+| `src/data/config.ts` | 링크(지원폼·카카오·인스타), 모집 기간, 공지 배너 |
+| `src/data/executives.ts` | 임원 카드 목록 (매년 교체) |
+| `src/data/activities.ts` | 활동 소개 카드 목록 |
+| `src/data/blogPosts.ts` | 블로그 글 목록/태그/링크 |
+
+자세한 수정 방법은 **[docs/MAINTENANCE.md](./docs/MAINTENANCE.md)** 를 참고하세요.
 
 ## 모바일 고려 사항
 
