@@ -8,7 +8,7 @@ const MOBILE_MQ    = '(max-width: 767px)';
 const SHORT_WIDE_MQ = '(min-width: 1024px) and (max-height: 600px)';
 
 // ── Hero 컴포넌트 ─────────────────────────────────────────────
-export default function Hero({ introActive = false, onBoot }: { introActive?: boolean; onBoot?: () => void }) {
+export default function Hero({ onBoot }: { onBoot?: () => void }) {
   const [isMobile,   setIsMobile]   = useState(false);
   const [isShortWide, setIsShortWide] = useState(false);
 
@@ -133,7 +133,7 @@ export default function Hero({ introActive = false, onBoot }: { introActive?: bo
           <div className="mx-auto flex w-full max-w-xl flex-col gap-4 px-8 md:max-w-none md:mx-0 md:pl-16 md:pr-8 lg:pl-24 lg:pr-6 md:gap-4 lg:gap-5">
             {textBlock}
             <div className="pointer-events-auto">
-              <HeroCodeDisplay started={!introActive} onBoot={onBoot} />
+              <HeroCodeDisplay onBoot={onBoot} />
             </div>
           </div>
         </div>

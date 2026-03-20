@@ -171,17 +171,15 @@ type HistoryEntry = { input: string; output: string[]; isError?: boolean; isHack
 
 // ── 컴포넌트 ─────────────────────────────────────────────────
 export default function HeroCodeDisplay({
-  started = true,
   onBoot,
 }: {
-  started?: boolean;
   onBoot?: () => void;
 }) {
   const navigate = useNavigate();
 
   // ── display 모드 (자동 타이핑)
-  const [visibleLines, setVisibleLines] = useState(LINES.length);
-  const displayDone = visibleLines >= LINES.length;
+  const visibleLines = LINES.length;
+  const displayDone = true;
 
   // ── interactive 모드
   const [mode, setMode]       = useState<'display' | 'interactive'>('display');

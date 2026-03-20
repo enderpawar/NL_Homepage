@@ -52,7 +52,7 @@ export default function App() {
       <Navbar />
       <main>
         <Routes>
-          <Route path="/"           element={<Home introActive={showIntro} onBoot={handleReplay} />} />
+          <Route path="/"           element={<Home onBoot={handleReplay} />} />
           <Route path="/activity"   element={<ActivityPage />} />
           <Route path="/executives" element={<ExecutivesPage />} />
           <Route path="/blog"       element={<BlogPage />} />
