@@ -19,6 +19,8 @@
   min-height: 100%;
   border: none;
   z-index: 0;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 /* 데스크톱(xl 이상): 히어로 배경 Spline을 화면 전체 폭으로 복원 */
@@ -114,7 +116,7 @@
   }
 }
 
-* { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; }
 
 html {
   overflow-x: hidden;

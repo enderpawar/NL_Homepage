@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { SPLINE_URL } from '../data/config';
 import HeroCodeDisplay from './HeroCodeDisplay';
@@ -11,7 +11,29 @@ const SHORT_WIDE_MQ = '(min-width: 1024px) and (max-height: 600px)';
 export default function Hero({ onBoot }: { onBoot?: () => void }) {
   const [isMobile,   setIsMobile]   = useState(false);
   const [isShortWide, setIsShortWide] = useState(false);
+  const [splineActive, setSplineActive] = useState(true);
+  const heroRef = useRef<HTMLElement>(null);
 
+  // 히어로 섹션이 뷰포트 밖으로 나가면 Spline WebGL 렌더링 중지
+  // 800ms 딜레이: 빠른 scroll-back 시 iframe 재로드 비용 방지
+  useEffect(() => {
+    const el = heroRef.current;
+    if (!el) return;
+    let timeout = 0;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          clearTimeout(timeout);
+          setSplineActive(true);
+        } else {
+          timeout = window.setTimeout(() => setSplineActive(false), 800);
+        }
+      },
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => { observer.disconnect(); clearTimeout(timeout); };
+  }, []);
 
   // 미디어 쿼리 감지
   useEffect(() => {
@@ -90,13 +112,14 @@ export default function Hero({ onBoot }: { onBoot?: () => void }) {
 
   return (
     <section
+      ref={heroRef}
       id="top"
       className="relative h-screen w-full overflow-x-clip overflow-y-clip bg-white"
     >
       {/* Spline 3D 배경 */}
       {showFullBleedSpline ? (
         <iframe
-          src={SPLINE_URL}
+          src={splineActive ? SPLINE_URL : ''}
           frameBorder={0}
           title="NL 3D 인터랙티브"
           className="hero-spline-frame"
@@ -115,7 +138,7 @@ export default function Hero({ onBoot }: { onBoot?: () => void }) {
             {showSplineRightSlot && (
               <div className="hero-spline-slot w-full shadow-sm ring-1 ring-[#E5E7EB]/80">
                 <iframe
-                  src={SPLINE_URL}
+                  src={splineActive ? SPLINE_URL : ''}
                   frameBorder={0}
                   title="NL 3D 인터랙티브"
                   className="hero-spline-iframe-fit"

@@ -12,14 +12,16 @@ function CountUp({ target, active }: { target: number; active: boolean }) {
   const [count, setCount] = useState(0);
   useEffect(() => {
     if (!active) return;
-    let cur = 0;
-    const step = Math.max(1, Math.ceil(target / 60));
-    const timer = setInterval(() => {
-      cur += step;
-      if (cur >= target) { setCount(target); clearInterval(timer); }
-      else setCount(cur);
-    }, 20);
-    return () => clearInterval(timer);
+    const duration = 1200;
+    const start = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const progress = Math.min((now - start) / duration, 1);
+      setCount(Math.round(progress * target));
+      if (progress < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
   }, [active, target]);
   return <>{count}</>;
 }
