@@ -216,7 +216,7 @@ export default function Hero({ onBoot }: { onBoot?: () => void }) {
           </div>
           {/* 우측 터미널 */}
           <div className="flex min-h-0 min-w-0 flex-1 basis-0 items-center justify-center pointer-events-auto">
-            <HeroCodeDisplay onBoot={onBoot} />
+            <HeroCodeDisplay onBoot={onBoot} tablet={isTabletWide} />
           </div>
         </div>
       ) : (

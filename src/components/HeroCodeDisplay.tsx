@@ -173,10 +173,13 @@ type HistoryEntry = { input: string; output: string[]; isError?: boolean; isHack
 export default function HeroCodeDisplay({
   onBoot,
   compact = false,
+  tablet = false,
 }: {
   onBoot?: () => void;
   /** 모바일 등 좁은 레이아웃에서 높이를 줄이고 스크롤바를 제거 */
   compact?: boolean;
+  /** 태블릿 레이아웃에서 터미널 높이 확장 */
+  tablet?: boolean;
 }) {
   const navigate = useNavigate();
 
@@ -202,7 +205,8 @@ export default function HeroCodeDisplay({
     setMode('interactive');
     setHistory([]);
     setTyped('');
-    setTimeout(() => inputRef.current?.focus(), 50);
+    // iOS/iPad: setTimeout 없이 즉시 focus (사용자 제스처 컨텍스트 유지)
+    inputRef.current?.focus();
   }, []);
 
   // 커맨드 실행
@@ -317,6 +321,11 @@ export default function HeroCodeDisplay({
         cursor: mode === 'display' ? 'pointer' : 'text',
       }}
       onClick={handleClick}
+      onTouchEnd={(e) => {
+        // iOS/iPad: touchend에서 직접 focus → 키보드 표시
+        e.preventDefault();
+        handleClick();
+      }}
     >
       {/* 타이틀 바 */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/10 select-none">
@@ -349,7 +358,7 @@ export default function HeroCodeDisplay({
       <div
         ref={bodyRef}
         className="px-5 py-4 overflow-x-hidden overflow-y-auto select-none terminal-body"
-        style={{ maxHeight: compact ? '160px' : '230px' }}
+        style={{ maxHeight: compact ? '160px' : tablet ? '320px' : '230px' }}
       >
         {/* ── display 모드 ── */}
         {mode === 'display' && (
@@ -495,30 +504,33 @@ export default function HeroCodeDisplay({
         )}
       </div>
 
-      {/* 한글 IME 지원용 숨겨진 input */}
-      {mode === 'interactive' && (
-        <input
-          ref={inputRef}
-          onChange={handleInputChange}
-          onKeyDown={handleInputKeyDown}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: '-9999px',
-            width: '300px',
-            height: '24px',
-            opacity: 0,
-            border: 'none',
-            padding: 0,
-            margin: 0,
-            pointerEvents: 'none',
-          }}
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-          spellCheck={false}
-        />
-      )}
+      {/* 한글 IME + 터치 키보드 지원용 숨겨진 input
+          항상 마운트: iOS/iPad에서 focus()는 DOM에 이미 존재하는 요소에만 동작.
+          position: absolute + overflow:hidden으로 시각적으로 숨김.
+          fontSize: 16px — iOS Safari가 <16px input에 자동 zoom 하는 것 방지. */}
+      <input
+        ref={inputRef}
+        onChange={handleInputChange}
+        onKeyDown={handleInputKeyDown}
+        tabIndex={mode === 'interactive' ? 0 : -1}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '1px',
+          height: '1px',
+          opacity: 0,
+          border: 'none',
+          padding: 0,
+          margin: 0,
+          fontSize: '16px',
+          pointerEvents: 'none',
+        }}
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="off"
+        spellCheck={false}
+      />
     </div>
   );
 }
