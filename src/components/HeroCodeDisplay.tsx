@@ -172,8 +172,11 @@ type HistoryEntry = { input: string; output: string[]; isError?: boolean; isHack
 // ── 컴포넌트 ─────────────────────────────────────────────────
 export default function HeroCodeDisplay({
   onBoot,
+  compact = false,
 }: {
   onBoot?: () => void;
+  /** 모바일 등 좁은 레이아웃에서 높이를 줄이고 스크롤바를 제거 */
+  compact?: boolean;
 }) {
   const navigate = useNavigate();
 
@@ -342,11 +345,11 @@ export default function HeroCodeDisplay({
         </div>
       )}
 
-      {/* 바디 */}
+      {/* 바디 — 가로 스크롤 비활성화, 세로는 히스토리 확장 시만 노출 */}
       <div
         ref={bodyRef}
-        className="px-5 py-4 overflow-x-auto overflow-y-auto select-none"
-        style={{ maxHeight: '230px' }}
+        className="px-5 py-4 overflow-x-hidden overflow-y-auto select-none terminal-body"
+        style={{ maxHeight: compact ? '160px' : '230px' }}
       >
         {/* ── display 모드 ── */}
         {mode === 'display' && (
@@ -354,9 +357,11 @@ export default function HeroCodeDisplay({
             <pre
               style={{
                 fontFamily: "'JetBrains Mono', 'Courier New', Courier, monospace",
-                fontSize: '0.88rem',
+                fontSize: compact ? '0.72rem' : '0.88rem',
                 lineHeight: '1.7',
-                whiteSpace: 'pre',
+                // compact(모바일)일 때 pre-wrap으로 긴 한글 라인 자동 줄바꿈
+                whiteSpace: compact ? 'pre-wrap' : 'pre',
+                wordBreak: compact ? 'break-word' : undefined,
                 margin: 0,
               }}
             >

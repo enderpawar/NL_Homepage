@@ -152,3 +152,10 @@ body {
 }
 
 .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+/* 터미널 스크롤바 숨기기 — 스크롤 기능은 유지하되 시각적 노출 제거 */
+.terminal-body::-webkit-scrollbar { display: none; }
+.terminal-body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}

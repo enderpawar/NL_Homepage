@@ -4,9 +4,9 @@ import { SPLINE_URL } from '../data/config';
 import HeroCodeDisplay from './HeroCodeDisplay';
 
 const MOBILE_MQ    = '(max-width: 767px)';
-/** 768px~1279px 태블릿 구간: full-bleed Spline 숨김 (갤럭시 탭 S4 등) */
-const TABLET_WIDE_MQ = '(min-width: 768px) and (max-width: 1279px)';
-/** 1024×600 등 짧은 화면: Spline을 우측 슬롯에만 배치 */
+/** 768px~1399px 태블릿 구간: full-bleed Spline 숨김 (iPad Pro 12.9" 가로까지 포함) */
+const TABLET_WIDE_MQ = '(min-width: 768px) and (max-width: 1399px)';
+/** 1024×600 등 짧은 화면 (Nest Hub 등) */
 const SHORT_WIDE_MQ = '(min-width: 1024px) and (max-height: 600px)';
 const MAX_RETRIES = 3;
 
@@ -80,8 +80,8 @@ export default function Hero({ onBoot }: { onBoot?: () => void }) {
     return () => { rem(mqM, sync); rem(mqT, sync); rem(mqS, sync); };
   }, []);
 
+  // 풀-블리드 Spline은 데스크톱(1400px+)에서만 표시
   const showFullBleedSpline = !isMobile && !isTabletWide && !isShortWide;
-  const showSplineRightSlot = !isMobile && isShortWide;
 
   // iframe onLoad: HTML 문서 로드 완료 → fade-in 시작
   const handleSplineLoad = () => setSplineLoaded(true);
@@ -182,48 +182,26 @@ export default function Hero({ onBoot }: { onBoot?: () => void }) {
         />
       )}
 
-      {/* ── 짧은 화면: 텍스트 좌측 + Spline 우측 슬롯 ─────────── */}
-      {isShortWide ? (
-        <div className="absolute inset-0 z-10 flex min-h-0 flex-row items-center gap-3 pt-16 pb-3 pl-5 pr-5 lg:gap-6 lg:pl-8 lg:pr-8 pointer-events-none">
+      {/* ── 태블릿 가로 / 짧은 화면: 텍스트 좌측 + 터미널 우측 ── */}
+      {(isShortWide || isTabletWide) ? (
+        <div
+          className="absolute inset-0 z-10 flex min-h-0 flex-row items-center pointer-events-none"
+          style={{
+            gap: isShortWide ? '0.75rem' : '2rem',
+            padding: isShortWide ? '4rem 1.25rem 0.75rem' : '5rem 3rem 2rem 4rem',
+          }}
+        >
+          {/* 좌측 텍스트 */}
           <div className="flex min-h-0 min-w-0 flex-1 basis-0 flex-col gap-3 lg:gap-4 pointer-events-none">
             {textBlock}
           </div>
+          {/* 우측 터미널 */}
           <div className="flex min-h-0 min-w-0 flex-1 basis-0 items-center justify-center pointer-events-auto">
-            {showSplineRightSlot && (
-              <div className="hero-spline-slot w-full shadow-sm ring-1 ring-[#E5E7EB]/80" style={{ position: 'relative' }}>
-                {/* 슬롯 내부 그라디언트 폴백 */}
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-0 rounded-xl"
-                  style={{
-                    background:
-                      'radial-gradient(ellipse at 30% 30%, rgba(79,70,229,0.15) 0%, transparent 60%),' +
-                      'radial-gradient(ellipse at 70% 70%, rgba(6,182,212,0.10) 0%, transparent 60%)',
-                  }}
-                />
-                {/* 슬롯 shimmer */}
-                {!splineLoaded && splineRetries < MAX_RETRIES && (
-                  <div aria-hidden="true" className="absolute inset-0 rounded-xl hero-spline-shimmer" />
-                )}
-                <iframe
-                  key={splineKey}
-                  src={splineActive ? SPLINE_URL : ''}
-                  frameBorder={0}
-                  title="NL 3D 인터랙티브"
-                  className="hero-spline-iframe-fit"
-                  style={{
-                    opacity: splineLoaded ? 1 : 0,
-                    transition: splineLoaded ? 'opacity 0.8s ease' : 'none',
-                  }}
-                  onLoad={handleSplineLoad}
-                  onError={handleSplineError}
-                />
-              </div>
-            )}
+            <HeroCodeDisplay onBoot={onBoot} />
           </div>
         </div>
       ) : (
-        /* ── 일반 레이아웃: 텍스트 + 부트 터미널 좌측 ─────────── */
+        /* ── 데스크톱 레이아웃: 텍스트 + 부트 터미널 좌측 ─────── */
         <div
           className="absolute inset-y-0 left-0 flex w-full pointer-events-none pt-20 pb-8 md:w-[52%] md:pt-22 md:pb-10 lg:pt-24 lg:pb-12"
           style={{ zIndex: 10, alignItems: 'safe center' }}
@@ -231,7 +209,7 @@ export default function Hero({ onBoot }: { onBoot?: () => void }) {
           <div className="mx-auto flex w-full max-w-xl flex-col gap-4 px-8 md:max-w-none md:mx-0 md:pl-16 md:pr-8 lg:pl-24 lg:pr-6 md:gap-4 lg:gap-5">
             {textBlock}
             <div className="pointer-events-auto">
-              <HeroCodeDisplay onBoot={onBoot} />
+              <HeroCodeDisplay onBoot={onBoot} compact={isMobile} />
             </div>
           </div>
         </div>

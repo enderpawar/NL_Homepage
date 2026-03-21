@@ -35,6 +35,8 @@ export default function HeroIntro({ onDone }: { onDone: () => void }) {
   const [charIdx,    setCharIdx]    = useState(0);
   const [asciiCount, setAsciiCount] = useState(0);
   const [phase, setPhase] = useState<'idle' | 'typing' | 'ascii' | 'done' | 'exiting'>('idle');
+  // ASCII 아트 최장 행 기준 네이티브 너비(1rem 폰트 기준 ~1250px). 컨테이너 너비에 맞게 zoom 자동 계산
+  const [asciiZoom, setAsciiZoom] = useState(0.70);
 
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
@@ -44,6 +46,16 @@ export default function HeroIntro({ onDone }: { onDone: () => void }) {
   useEffect(() => {
     if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
   });
+
+  // 마운트 후 실제 컨테이너 너비를 측정해 ASCII 아트 zoom 계산
+  // 네이티브 너비(1rem 폰트) 약 1250px 기준, 여백 48px 제외
+  useEffect(() => {
+    if (!bodyRef.current) return;
+    const w = bodyRef.current.clientWidth;
+    const ASCII_NATIVE_PX = 1250;
+    const computed = Math.min(0.70, Math.max(0.15, (w - 48) / ASCII_NATIVE_PX));
+    setAsciiZoom(computed);
+  }, []);
 
   // ① 시작 딜레이
   useEffect(() => {
@@ -154,7 +166,7 @@ export default function HeroIntro({ onDone }: { onDone: () => void }) {
           {/* 터미널 바디 */}
           <div
             ref={bodyRef}
-            className="px-5 py-4 overflow-x-auto overflow-y-auto select-none"
+            className="px-5 py-4 overflow-x-hidden overflow-y-auto select-none terminal-body"
             style={{ maxHeight: '70vh' }}
           >
             <pre
@@ -205,9 +217,9 @@ export default function HeroIntro({ onDone }: { onDone: () => void }) {
               )}
             </pre>
 
-            {/* ASCII 아트 */}
+            {/* ASCII 아트 — 컨테이너 너비에 맞게 zoom 자동 조정 */}
             {showAscii && (
-              <div style={{ zoom: 0.70, marginTop: '2px' }}>
+              <div style={{ zoom: asciiZoom, marginTop: '2px' }}>
                 <pre
                   style={{
                     fontFamily: "'JetBrains Mono', 'Courier New', Courier, monospace",
