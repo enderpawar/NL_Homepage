@@ -2,9 +2,10 @@
 
 이 프로젝트는 컴퓨터공학과 학술동아리 `NL(Network Leader)`의 신입생 모집 홍보 페이지입니다.
 Vite + React + TypeScript(엄격 모드) + Tailwind CSS로 구성되어 있으며, `Hero`에는 Spline 3D iframe을 사용합니다.
+![Uploading image.png…]()
 
 ## 기능
-
+![images](./docs/README 소개페이지2.gif)
 - `Hero` 섹션: 인터랙티브 터미널 + Spline 3D
   - 터미널은 기본 상태에서 동아리 소개 문구(JSDoc 형식)를 즉시 표시
   - 클릭 시 인터랙티브 모드 전환 (`cd`, `ls`, `fortune` 등 명령어 지원)
