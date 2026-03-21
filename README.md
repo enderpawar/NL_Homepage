@@ -1,11 +1,12 @@
-# NL (Network Leader) 홍보 페이지
+# [NL (Network Leader) 홍보 페이지](https://enderpawar.github.io/NL_Homepage/)
+
+<img alt="image" src="https://github.com/enderpawar/NL_Homepage/blob/1ba5ca2131f66c7b381eb8d1543f70c3eb78a91c/docs/README%20%EC%86%8C%EA%B0%9C%ED%8E%98%EC%9D%B4%EC%A7%802.gif" />
 
 이 프로젝트는 컴퓨터공학과 학술동아리 `NL(Network Leader)`의 신입생 모집 홍보 페이지입니다.
 Vite + React + TypeScript(엄격 모드) + Tailwind CSS로 구성되어 있으며, `Hero`에는 Spline 3D iframe을 사용합니다.
-![Uploading image.png…]()
-
 ## 기능
-![images](./docs/README 소개페이지2.gif)
+[![Uploading image.png…]()
+
 - `Hero` 섹션: 인터랙티브 터미널 + Spline 3D
   - 터미널은 기본 상태에서 동아리 소개 문구(JSDoc 형식)를 즉시 표시
   - 클릭 시 인터랙티브 모드 전환 (`cd`, `ls`, `fortune` 등 명령어 지원)
