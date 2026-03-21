@@ -184,8 +184,8 @@ export default function HeroCodeDisplay({
   const visibleLines = LINES.length;
   const displayDone = true;
 
-  // ── interactive 모드
-  const [mode, setMode]       = useState<'display' | 'interactive'>('display');
+  // ── interactive 모드 (기본 상태)
+  const [mode, setMode]       = useState<'display' | 'interactive'>('interactive');
   const [typed, setTyped]     = useState('');
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const termRef   = useRef<HTMLDivElement>(null);
