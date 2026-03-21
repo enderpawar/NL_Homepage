@@ -4,14 +4,17 @@ import { SPLINE_URL } from '../data/config';
 import HeroCodeDisplay from './HeroCodeDisplay';
 
 const MOBILE_MQ    = '(max-width: 767px)';
+/** 768px~1279px 태블릿 구간: full-bleed Spline 숨김 (갤럭시 탭 S4 등) */
+const TABLET_WIDE_MQ = '(min-width: 768px) and (max-width: 1279px)';
 /** 1024×600 등 짧은 화면: Spline을 우측 슬롯에만 배치 */
 const SHORT_WIDE_MQ = '(min-width: 1024px) and (max-height: 600px)';
 const MAX_RETRIES = 3;
 
 // ── Hero 컴포넌트 ─────────────────────────────────────────────
 export default function Hero({ onBoot }: { onBoot?: () => void }) {
-  const [isMobile,   setIsMobile]   = useState(false);
-  const [isShortWide, setIsShortWide] = useState(false);
+  const [isMobile,     setIsMobile]     = useState(false);
+  const [isTabletWide, setIsTabletWide] = useState(false);
+  const [isShortWide,  setIsShortWide]  = useState(false);
   const [splineActive, setSplineActive] = useState(true);
   const [splineKey,    setSplineKey]    = useState(0);
   const [splineLoaded, setSplineLoaded] = useState(false);
@@ -55,9 +58,11 @@ export default function Hero({ onBoot }: { onBoot?: () => void }) {
   // 미디어 쿼리 감지
   useEffect(() => {
     const mqM = window.matchMedia(MOBILE_MQ);
+    const mqT = window.matchMedia(TABLET_WIDE_MQ);
     const mqS = window.matchMedia(SHORT_WIDE_MQ);
     const sync = () => {
       setIsMobile(mqM.matches);
+      setIsTabletWide(mqT.matches);
       setIsShortWide(mqS.matches);
     };
     sync();
@@ -70,11 +75,12 @@ export default function Hero({ onBoot }: { onBoot?: () => void }) {
       else mq.removeListener(fn);
     };
     add(mqM, sync);
+    add(mqT, sync);
     add(mqS, sync);
-    return () => { rem(mqM, sync); rem(mqS, sync); };
+    return () => { rem(mqM, sync); rem(mqT, sync); rem(mqS, sync); };
   }, []);
 
-  const showFullBleedSpline = !isMobile && !isShortWide;
+  const showFullBleedSpline = !isMobile && !isTabletWide && !isShortWide;
   const showSplineRightSlot = !isMobile && isShortWide;
 
   // iframe onLoad: HTML 문서 로드 완료 → fade-in 시작
