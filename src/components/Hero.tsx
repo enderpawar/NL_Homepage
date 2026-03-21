@@ -182,6 +182,25 @@ export default function Hero({ onBoot }: { onBoot?: () => void }) {
         />
       )}
 
+      {/* 데스크톱 전용: Spline 위 그라디언트 오버레이
+          Spline(z-index 0) 위, 콘텐츠(z-index 10) 아래에 위치.
+          pointer-events none으로 Spline 마우스 인터랙션 유지.
+          모바일·태블릿과 같은 색상 계열로 배경이 쨍하게 보이지 않도록 처리. */}
+      {showFullBleedSpline && (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            zIndex: 5,
+            background:
+              'radial-gradient(ellipse at 18% 22%, rgba(79,70,229,0.22) 0%, transparent 50%),' +
+              'radial-gradient(ellipse at 74% 62%, rgba(6,182,212,0.15) 0%, transparent 48%),' +
+              'radial-gradient(ellipse at 48% 96%, rgba(79,70,229,0.10) 0%, transparent 52%),' +
+              'radial-gradient(ellipse at 90% 10%, rgba(79,70,229,0.07) 0%, transparent 38%)',
+          }}
+        />
+      )}
+
       {/* ── 태블릿 가로 / 짧은 화면: 텍스트 좌측 + 터미널 우측 ── */}
       {(isShortWide || isTabletWide) ? (
         <div
