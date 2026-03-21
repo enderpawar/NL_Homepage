@@ -20,6 +20,33 @@ const STATS = [
   { value: '100%', label: '성장 보장' },
 ];
 
+function TimelineCard({
+  item,
+  inView,
+  index,
+}: {
+  item: (typeof TIMELINE)[number];
+  inView: boolean;
+  index: number;
+}) {
+  return (
+    <div
+      className="bg-white rounded-2xl p-6 border border-[#E5E7EB] shadow-sm hover:shadow-md transition-all duration-700 w-full"
+      style={{
+        opacity: inView ? 1 : 0,
+        transform: inView ? 'translateY(0)' : 'translateY(24px)',
+        transitionDelay: `${index * 100}ms`,
+      }}
+    >
+      <p className="font-mono text-xs mb-1" style={{ color: item.color }}>
+        {item.month}
+      </p>
+      <h3 className="font-bold text-[#111111] text-lg mb-1">{item.title}</h3>
+      <p className="text-[#555555] text-sm">{item.desc}</p>
+    </div>
+  );
+}
+
 export default function ActivityPage() {
   const heroRef  = useInView(0.1);
   const statsRef = useInView(0.2);
@@ -153,37 +180,53 @@ export default function ActivityPage() {
               연간 일정
             </h2>
           </div>
-          <div className="relative">
-            {/* 중앙 선 */}
-            <div className="absolute left-1/2 top-0 bottom-0 w-0 border-l-2 border-dashed border-[rgba(79,70,229,0.55)] hidden md:block" />
+          {/* 모바일: 왼쪽 세로축 + 마커가 선 위에 붙는 타임라인 (떠 있는 점 제거) */}
+          <div className="md:hidden relative pl-2">
+            {/* pl-2(8px) + 마커열 w-8 중앙(16px) = 24px → left-6 과 동일. 1px 선은 -translate-x-1/2 로 중심 정렬 */}
+            <div
+              className="pointer-events-none absolute left-6 top-3 bottom-3 w-px -translate-x-1/2 bg-[#C7D2FE]"
+              aria-hidden
+            />
+            <ul className="flex flex-col gap-5 list-none m-0 p-0">
+              {TIMELINE.map((item, i) => (
+                <li key={item.month} className="relative flex gap-4 items-stretch">
+                  <div className="relative z-10 flex flex-col items-center shrink-0 w-8 pt-5">
+                    <span
+                      className="w-3.5 h-3.5 rounded-full border-[3px] border-[#F9FAFB] shadow-sm shrink-0"
+                      style={{ background: item.color }}
+                      aria-hidden
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1 pb-0">
+                    <TimelineCard item={item} inView={timeRef.inView} index={i} />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* 태블릿 이상: 기존 중앙 점선 + 좌우 교차 레이아웃 */}
+          <div className="relative hidden md:block">
+            <div className="absolute left-1/2 top-0 bottom-0 w-0 border-l-2 border-dashed border-[rgba(79,70,229,0.55)]" />
             <div className="flex flex-col gap-8">
               {TIMELINE.map((item, i) => (
                 <div
                   key={item.month}
-                  className={`flex flex-col md:flex-row md:items-center items-stretch gap-4 transition-all duration-700 ${
-                    i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
+                  className={`flex flex-row items-center gap-4 ${
+                    i % 2 === 0 ? 'flex-row' : 'flex-row-reverse'
                   }`}
-                  style={{
-                    opacity: timeRef.inView ? 1 : 0,
-                    transform: timeRef.inView ? 'translateY(0)' : 'translateY(24px)',
-                    transitionDelay: `${i * 100}ms`,
-                  }}
                 >
-                  <div className={`w-full md:flex-1 ${i % 2 === 0 ? 'md:text-right' : 'md:text-left'}`}>
-                    <div className="bg-white rounded-2xl p-6 border border-[#E5E7EB] shadow-sm hover:shadow-md transition-shadow inline-block w-full">
-                      <p className="font-mono text-xs mb-1" style={{ color: item.color }}>
-                        {item.month}
-                      </p>
-                      <h3 className="font-bold text-[#111111] text-lg mb-1">{item.title}</h3>
-                      <p className="text-[#555555] text-sm">{item.desc}</p>
+                  <div className={`flex-1 ${i % 2 === 0 ? 'text-right' : 'text-left'}`}>
+                    <div className={`inline-block w-full ${i % 2 === 0 ? 'ml-auto' : 'mr-auto'}`}>
+                      <TimelineCard item={item} inView={timeRef.inView} index={i} />
                     </div>
                   </div>
-                  {/* 중앙 도트 */}
                   <div
-                    className="w-5 h-5 rounded-full border-2 border-white shadow-md shrink-0 z-10 self-center"
+                    className="w-5 h-5 rounded-full border-2 border-white shadow-md shrink-0 z-10"
                     style={{ background: item.color }}
+                    aria-hidden
                   />
-                  <div className="flex-1 hidden md:block" />
+                  <div className="flex-1" />
                 </div>
               ))}
             </div>
