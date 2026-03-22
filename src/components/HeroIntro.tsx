@@ -111,7 +111,7 @@ export default function HeroIntro({ onDone }: { onDone: () => void }) {
   // ④ done → exiting (ASCII 아트 0.3s 더 노출 후 페이드아웃)
   useEffect(() => {
     if (phase !== 'done') return;
-    const t = setTimeout(() => setPhase('exiting'), 1000);
+    const t = setTimeout(() => setPhase('exiting'), 1200);
     return () => clearTimeout(t);
   }, [phase]);
 
