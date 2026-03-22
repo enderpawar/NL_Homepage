@@ -39,6 +39,8 @@ export default function HeroBootTerminal({ onDone }: { onDone: () => void }) {
   const [charIdx,    setCharIdx]    = useState(0);
   const [asciiCount, setAsciiCount] = useState(0);
   const [phase, setPhase] = useState<'idle' | 'typing' | 'ascii' | 'done'>('idle');
+  // ASCII 아트 최장 행 기준 네이티브 너비(1rem 폰트 기준 ~1500px). 컨테이너 너비에 맞게 zoom 자동 계산
+  const [asciiZoom, setAsciiZoom] = useState(0.65);
 
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
@@ -48,6 +50,24 @@ export default function HeroBootTerminal({ onDone }: { onDone: () => void }) {
   useEffect(() => {
     if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
   });
+
+  // 컨테이너 너비 기반 ASCII zoom 계산 — ResizeObserver로 방향 전환 등 변경 시 재계산
+  useEffect(() => {
+    if (!bodyRef.current) return;
+    const el = bodyRef.current;
+    const ASCII_NATIVE_PX = 1500;
+    const calc = () => {
+      const w = el.clientWidth;
+      if (w === 0) return;
+      const available = (w - 40) * 0.95;
+      const computed = Math.min(0.65, Math.max(0.10, available / ASCII_NATIVE_PX));
+      setAsciiZoom(computed);
+    };
+    calc();
+    const ro = new ResizeObserver(calc);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   // ① 시작 딜레이
   useEffect(() => {
@@ -209,7 +229,7 @@ export default function HeroBootTerminal({ onDone }: { onDone: () => void }) {
           · zoom 은 transform 과 달리 layout box 까지 축소하므로
             155 × 9.6px × 0.38 ≈ 565px — 터미널 폭 내 수용 가능. */}
         {showAscii && (
-          <div style={{ zoom: 0.70, marginTop: '2px' }}>
+          <div style={{ zoom: asciiZoom, marginTop: '2px' }}>
             <pre
               style={{
                 fontFamily: "'JetBrains Mono', 'Courier New', Courier, monospace",

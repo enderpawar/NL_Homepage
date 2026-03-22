@@ -39,8 +39,8 @@ export default function HeroIntro({ onDone }: { onDone: () => void }) {
   const [charIdx,    setCharIdx]    = useState(0);
   const [asciiCount, setAsciiCount] = useState(0);
   const [phase, setPhase] = useState<'idle' | 'typing' | 'ascii' | 'done' | 'exiting'>('idle');
-  // ASCII 아트 최장 행 기준 네이티브 너비(1rem 폰트 기준 ~1250px). 컨테이너 너비에 맞게 zoom 자동 계산
-  const [asciiZoom, setAsciiZoom] = useState(0.70);
+  // ASCII 아트 최장 행 기준 네이티브 너비(1rem 폰트 기준 ~1500px). 컨테이너 너비에 맞게 zoom 자동 계산
+  const [asciiZoom, setAsciiZoom] = useState(0.65);
 
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
@@ -51,14 +51,25 @@ export default function HeroIntro({ onDone }: { onDone: () => void }) {
     if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
   });
 
-  // 마운트 후 실제 컨테이너 너비를 측정해 ASCII 아트 zoom 계산
-  // 네이티브 너비(1rem 폰트) 약 1250px 기준, 여백 48px 제외
+  // 컨테이너 너비를 측정해 ASCII 아트 zoom 계산 (마운트 + 리사이즈 대응)
+  // 네이티브 너비(1rem 폰트) 약 1500px 기준 (155자 × ~9.6px)
+  // ResizeObserver로 iOS 방향 전환 등 레이아웃 변경 시 자동 재계산
   useEffect(() => {
     if (!bodyRef.current) return;
-    const w = bodyRef.current.clientWidth;
-    const ASCII_NATIVE_PX = 1250;
-    const computed = Math.min(0.70, Math.max(0.15, (w - 48) / ASCII_NATIVE_PX));
-    setAsciiZoom(computed);
+    const el = bodyRef.current;
+    const ASCII_NATIVE_PX = 1500;
+    const calc = () => {
+      const w = el.clientWidth;
+      if (w === 0) return;
+      // px-5 패딩(40px) 제외, 5% 여유 마진 추가
+      const available = (w - 40) * 0.95;
+      const computed = Math.min(0.65, Math.max(0.10, available / ASCII_NATIVE_PX));
+      setAsciiZoom(computed);
+    };
+    calc();
+    const ro = new ResizeObserver(calc);
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
 
   // ① 시작 딜레이
