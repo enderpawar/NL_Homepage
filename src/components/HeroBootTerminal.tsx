@@ -225,41 +225,35 @@ export default function HeroBootTerminal({ onDone }: { onDone: () => void }) {
 
         {/* ── ASCII 아트 ────────────────────────────────────────────
           렌더링 원리:
-          · font-size: 1rem (16px) 에서 선명하게 렌더링 후
-            zoom: 0.38 로 레이아웃·시각 크기를 함께 38% 축소합니다.
-          · 6px 직접 렌더링은 픽셀 스냅(3 or 4px/char) 오차가
-            155자 × 1px = 최대 155px 열 정렬 붕괴를 유발합니다.
-          · zoom 은 transform 과 달리 layout box 까지 축소하므로
-            155 × 9.6px × 0.38 ≈ 565px — 터미널 폭 내 수용 가능. */}
+          · zoom 속성은 iOS Safari에서 레이아웃 박스를 제대로 축소하지 않아
+            pre가 원래 크기(~1500px)를 유지한 채 overflow 발생.
+          · font-size를 직접 줄이면 텍스트 자체가 작아져 overflow 없이 동작. */}
         {showAscii && (
-          <div style={{ zoom: asciiZoom, marginTop: '2px' }}>
-            <pre
-              style={{
-                fontFamily: "'JetBrains Mono', 'Courier New', Courier, monospace",
-                fontSize: '1rem',
-                lineHeight: '1.3',
-                whiteSpace: 'pre',
-                margin: 0,
-                padding: 0,
-                color: '#10B981',
-                /* 렌더링 힌트: 커닝/합자 비활성화 → 완전한 등폭 보장 */
-                fontKerning: 'none',
-                textRendering: 'optimizeSpeed',
-              }}
-            >
-              {ASCII_ART.slice(0, asciiCount).map((line, i) => (
-                <span
-                  key={i}
-                  style={{
-                    display: 'block',
-                    animation: 'asciiLineReveal 220ms ease-out both',
-                  }}
-                >
-                  {line === '' ? '\u00A0' : line}
-                </span>
-              ))}
-            </pre>
-          </div>
+          <pre
+            style={{
+              fontFamily: "'JetBrains Mono', 'Courier New', Courier, monospace",
+              fontSize: `${asciiZoom}rem`,
+              lineHeight: '1.3',
+              whiteSpace: 'pre',
+              margin: '2px 0 0 0',
+              padding: 0,
+              color: '#10B981',
+              fontKerning: 'none',
+              textRendering: 'optimizeSpeed',
+            }}
+          >
+            {ASCII_ART.slice(0, asciiCount).map((line, i) => (
+              <span
+                key={i}
+                style={{
+                  display: 'block',
+                  animation: 'asciiLineReveal 220ms ease-out both',
+                }}
+              >
+                {line === '' ? '\u00A0' : line}
+              </span>
+            ))}
+          </pre>
         )}
 
         {/* ── 완료 후 최종 프롬프트 ──────────────────────────────── */}

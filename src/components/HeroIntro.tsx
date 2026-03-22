@@ -237,22 +237,24 @@ export default function HeroIntro({ onDone }: { onDone: () => void }) {
               )}
             </pre>
 
-            {/* ASCII 아트 — 컨테이너 너비에 맞게 zoom 자동 조정 */}
+            {/* ASCII 아트 — font-size로 직접 크기 조정
+                zoom 속성은 iOS Safari에서 레이아웃 박스를 제대로 축소하지 않아
+                pre 요소가 실제로는 원래 크기(~1500px)를 유지한 채 overflow 발생.
+                font-size를 직접 줄이면 텍스트 자체가 작아져 overflow 없이 동작. */}
             {showAscii && (
-              <div style={{ zoom: asciiZoom, marginTop: '2px' }}>
-                <pre
-                  style={{
-                    fontFamily: "'JetBrains Mono', 'Courier New', Courier, monospace",
-                    fontSize: '1rem',
-                    lineHeight: '1.3',
-                    whiteSpace: 'pre',
-                    margin: 0,
-                    padding: 0,
-                    color: '#10B981',
-                    fontKerning: 'none',
-                    textRendering: 'optimizeSpeed',
-                  }}
-                >
+              <pre
+                style={{
+                  fontFamily: "'JetBrains Mono', 'Courier New', Courier, monospace",
+                  fontSize: `${asciiZoom}rem`,
+                  lineHeight: '1.3',
+                  whiteSpace: 'pre',
+                  margin: '2px 0 0 0',
+                  padding: 0,
+                  color: '#10B981',
+                  fontKerning: 'none',
+                  textRendering: 'optimizeSpeed',
+                }}
+              >
                   {ASCII_ART.slice(0, asciiCount).map((line, i) => (
                     <span
                       key={i}
@@ -265,8 +267,7 @@ export default function HeroIntro({ onDone }: { onDone: () => void }) {
                       {line === '' ? '\u00A0' : line}
                     </span>
                   ))}
-                </pre>
-              </div>
+              </pre>
             )}
 
           </div>
