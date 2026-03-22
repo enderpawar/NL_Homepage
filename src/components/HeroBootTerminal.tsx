@@ -51,22 +51,23 @@ export default function HeroBootTerminal({ onDone }: { onDone: () => void }) {
     if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
   });
 
-  // 컨테이너 너비 기반 ASCII zoom 계산 — ResizeObserver로 방향 전환 등 변경 시 재계산
+  // 뷰포트 너비 기반 ASCII 아트 zoom 계산 (iOS Safari 대응)
   useEffect(() => {
-    if (!bodyRef.current) return;
-    const el = bodyRef.current;
     const ASCII_NATIVE_PX = 1500;
     const calc = () => {
-      const w = el.clientWidth;
-      if (w === 0) return;
-      const available = (w - 40) * 0.95;
+      const vw = document.documentElement.clientWidth || window.innerWidth;
+      const available = (vw * 0.96 - 40) * 0.95;
       const computed = Math.min(0.65, Math.max(0.10, available / ASCII_NATIVE_PX));
       setAsciiZoom(computed);
     };
+    const onOrient = () => setTimeout(calc, 150);
     calc();
-    const ro = new ResizeObserver(calc);
-    ro.observe(el);
-    return () => ro.disconnect();
+    window.addEventListener('resize', calc);
+    window.addEventListener('orientationchange', onOrient);
+    return () => {
+      window.removeEventListener('resize', calc);
+      window.removeEventListener('orientationchange', onOrient);
+    };
   }, []);
 
   // ① 시작 딜레이
@@ -162,10 +163,12 @@ export default function HeroBootTerminal({ onDone }: { onDone: () => void }) {
         />
       </div>
 
-      {/* 터미널 바디 */}
+      {/* 터미널 바디 — iOS Safari: overflow-x + overflow-y를 같은 요소에 쓰면 overflow-x가 무시됨
+          overflow:hidden 래퍼로 분리해 가로 클리핑 보장 */}
+      <div style={{ overflow: 'hidden' }}>
       <div
         ref={bodyRef}
-        className="px-5 py-4 overflow-x-auto overflow-y-auto select-none"
+        className="px-5 py-4 overflow-y-auto select-none"
         style={{ maxHeight: '460px' }}
       >
         {/* ── 명령어 히스토리 + 타이핑 라인 ───────────────────────
@@ -302,6 +305,7 @@ export default function HeroBootTerminal({ onDone }: { onDone: () => void }) {
           </p>
         )}
       </div>
+      </div>{/* overflow:hidden 래퍼 닫기 */}
     </div>
   );
 }

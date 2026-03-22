@@ -51,25 +51,27 @@ export default function HeroIntro({ onDone }: { onDone: () => void }) {
     if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
   });
 
-  // 컨테이너 너비를 측정해 ASCII 아트 zoom 계산 (마운트 + 리사이즈 대응)
-  // 네이티브 너비(1rem 폰트) 약 1500px 기준 (155자 × ~9.6px)
-  // ResizeObserver로 iOS 방향 전환 등 레이아웃 변경 시 자동 재계산
+  // 뷰포트 너비 기반 ASCII 아트 zoom 계산
+  // - iOS Safari에서 element.clientWidth는 overflow 콘텐츠 폭을 포함해 부정확할 수 있음
+  // - document.documentElement.clientWidth는 실제 뷰포트 너비를 정확히 반환
   useEffect(() => {
-    if (!bodyRef.current) return;
-    const el = bodyRef.current;
-    const ASCII_NATIVE_PX = 1500;
+    const ASCII_NATIVE_PX = 1500; // 155자 × ~9.6px(JetBrains Mono 1rem)
     const calc = () => {
-      const w = el.clientWidth;
-      if (w === 0) return;
-      // px-5 패딩(40px) 제외, 5% 여유 마진 추가
-      const available = (w - 40) * 0.95;
+      const vw = document.documentElement.clientWidth || window.innerWidth;
+      // 터미널 컨테이너: vw의 96%, 내부 패딩 40px 제외, 5% 여유 마진
+      const available = (vw * 0.96 - 40) * 0.95;
       const computed = Math.min(0.65, Math.max(0.10, available / ASCII_NATIVE_PX));
       setAsciiZoom(computed);
     };
+    // iOS 방향 전환 후 뷰포트 크기 확정까지 약간의 딜레이 필요
+    const onOrient = () => setTimeout(calc, 150);
     calc();
-    const ro = new ResizeObserver(calc);
-    ro.observe(el);
-    return () => ro.disconnect();
+    window.addEventListener('resize', calc);
+    window.addEventListener('orientationchange', onOrient);
+    return () => {
+      window.removeEventListener('resize', calc);
+      window.removeEventListener('orientationchange', onOrient);
+    };
   }, []);
 
   // ① 시작 딜레이
@@ -178,10 +180,13 @@ export default function HeroIntro({ onDone }: { onDone: () => void }) {
             />
           </div>
 
-          {/* 터미널 바디 */}
+          {/* 터미널 바디 — iOS Safari 버그 대응:
+              overflow-x:hidden + overflow-y:auto를 같은 요소에 쓰면 iOS에서 overflow-x:hidden이 무시됨.
+              별도 래퍼에 overflow:hidden을 두고, 안쪽 요소는 overflow-y:auto만 담당. */}
+          <div style={{ overflow: 'hidden' }}>
           <div
             ref={bodyRef}
-            className="px-5 py-4 overflow-x-hidden overflow-y-auto select-none terminal-body"
+            className="px-5 py-4 overflow-y-auto select-none terminal-body"
             style={{ maxHeight: '70vh' }}
           >
             <pre
@@ -265,6 +270,7 @@ export default function HeroIntro({ onDone }: { onDone: () => void }) {
             )}
 
           </div>
+          </div>{/* overflow:hidden 래퍼 닫기 */}
         </div>
       </div>
     </div>
