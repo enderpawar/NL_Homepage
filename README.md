@@ -1,4 +1,4 @@
-# NL — Network Leader 홍보 페이지
+# NL — Network Leader 홍보 사이트
 
 <img alt="NL 홍보 페이지 소개" src="https://github.com/enderpawar/NL_Homepage/blob/1ba5ca2131f66c7b381eb8d1543f70c3eb78a91c/docs/README%20%EC%86%8C%EA%B0%9C%ED%8E%98%EC%9D%B4%EC%A7%802.gif" />
 
