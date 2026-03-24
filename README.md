@@ -4,7 +4,7 @@
 
 **[→ 라이브 데모 보기](https://enderpawar.github.io/NL_Homepage/)**
 
-컴퓨터공학과 학술동아리 **NL(Network Leader)** 의 신입생 모집 홍보 페이지입니다.
+컴퓨터공학과 학술동아리 **NL(Network Leader)** 의 신입생 모집 홍보 페이지입니다
 React 19 + TypeScript + Vite 기반의 SPA로 구성되며, Spline 3D 인터랙션, 인터랙티브 터미널을 핵심 UX로 사용합니다.
 
 ---
