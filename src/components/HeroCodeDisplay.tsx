@@ -191,9 +191,10 @@ export default function HeroCodeDisplay({
   const [mode, setMode]       = useState<'display' | 'interactive'>('interactive');
   const [typed, setTyped]     = useState('');
   const [history, setHistory] = useState<HistoryEntry[]>([]);
-  const termRef   = useRef<HTMLDivElement>(null);
-  const inputRef  = useRef<HTMLInputElement>(null);
-  const bodyRef   = useRef<HTMLDivElement>(null);
+  const termRef        = useRef<HTMLDivElement>(null);
+  const inputRef       = useRef<HTMLInputElement>(null);
+  const bodyRef        = useRef<HTMLDivElement>(null);
+  const touchStartRef  = useRef<{ x: number; y: number } | null>(null);
 
   // 스크롤 최하단 유지
   useEffect(() => {
@@ -201,11 +202,15 @@ export default function HeroCodeDisplay({
   }, [history, typed, mode]);
 
   // 클릭 → interactive 모드 전환
-  const handleClick = useCallback(() => {
+  // 이미 interactive 모드면 히스토리를 유지한 채 포커스만 복원
+  const handleClick = useCallback((currentMode: 'display' | 'interactive') => {
+    if (currentMode === 'interactive') {
+      inputRef.current?.focus();
+      return;
+    }
     setMode('interactive');
     setHistory([]);
     setTyped('');
-    // iOS/iPad: setTimeout 없이 즉시 focus (사용자 제스처 컨텍스트 유지)
     inputRef.current?.focus();
   }, []);
 
@@ -320,11 +325,21 @@ export default function HeroCodeDisplay({
         border: '1px solid rgba(255,255,255,0.10)',
         cursor: mode === 'display' ? 'pointer' : 'text',
       }}
-      onClick={handleClick}
+      onClick={() => handleClick(mode)}
+      onTouchStart={(e) => {
+        touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }}
       onTouchEnd={(e) => {
+        const start = touchStartRef.current;
+        touchStartRef.current = null;
+        if (!start) return;
+        const dx = Math.abs(e.changedTouches[0].clientX - start.x);
+        const dy = Math.abs(e.changedTouches[0].clientY - start.y);
+        // 10px 이상 이동했으면 스크롤로 간주 → 포커스/히스토리 변경 없이 무시
+        if (dx > 10 || dy > 10) return;
         // iOS/iPad: touchend에서 직접 focus → 키보드 표시
         e.preventDefault();
-        handleClick();
+        handleClick(mode);
       }}
     >
       {/* 타이틀 바 */}
