@@ -1,8 +1,7 @@
-import { RECRUIT, LINKS, getRecruitStatus, getRecruitCountdown } from '../data/config';
+import { RECRUIT, LINKS, getRecruitStatus } from '../data/config';
 
 export default function JoinSection() {
   const recruit = getRecruitStatus();
-  const countdown = getRecruitCountdown();
 
   return (
     <section id="join" className="bg-[#111111] py-16 tablet:py-20 lg:py-24 px-4 tablet:px-6 lg:px-6">
@@ -26,7 +25,6 @@ export default function JoinSection() {
           <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full w-fit shrink-0 ${recruit.badge}`}>
             {recruit.label}
           </span>
-          <p className={`text-sm font-semibold ${countdown.tone}`}>{countdown.text}</p>
           <h2
             className="font-black text-white leading-tight"
             style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)' }}
